@@ -1,16 +1,16 @@
 # AnitsuCli
 
-#### Create the DataBase:
+#### Install Requirements and Create the DataBase:
 
 ```bash
+pip install -r requirements.txt
 chmod +x run.sh
 chmod +x *py
 ./run.sh
 ```
 
-#### Install requirements and run AnitsuCli
+#### Run AnitsuCli
 
 ```
-pip install -r requirements.txt
-./AnitsuCli.py
+./AnitsuCli.py --help
 ```
