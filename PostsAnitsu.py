@@ -72,7 +72,7 @@ async def update_db(posts: dict):
     for post in posts:
         content = post['content']['rendered']
         links = re.findall(R_NEXTCLOUD, content)
-        if not links: return 
+        if not links: continue
         db[post['id']] = {
             'Title': html.unescape(post['title']['rendered']),
             'Image': regex(R_IMG, content),
