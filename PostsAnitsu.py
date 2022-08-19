@@ -14,6 +14,7 @@ WP_URL = "https://anitsu.com.br/wp-json/wp/v2/posts?per_page=100&page={}"
 CC_TASKS = 10
 T_COLUMNS = os.get_terminal_size().columns // 2
 R_NEXTCLOUD = re.compile(r'https?:\/\/(.*?\/nextcloud\/s\/[^\"]{15})')
+R_OCLOUD = re.compile(r'https?:\/\/(www\.odrive\.com\/s\/[^\"]*)')
 R_MAL = re.compile(r'https?:\/\/myanimelist\.net\/anime\/(\d*)?\/[^\\]+')
 R_ANILIST = re.compile(r'https?:\/\/anilist\.co\/anime\/(\d*)?\/[^\\]+')
 R_IMG = re.compile(r'(https?:\/\/.*?\/.*?\.(?:png|jpe?g|webp|gif))')
@@ -72,7 +73,8 @@ async def update_db(posts: dict):
     for post in posts:
         content = post['content']['rendered']
         links = re.findall(R_NEXTCLOUD, content)
-        if not links: continue
+        odrive_links = re.findall(R_OCLOUD, content)
+        if not links and not odrive_links: continue
         db[post['id']] = {
             'Title': html.unescape(post['title']['rendered']),
             'Image': regex(R_IMG, content),
@@ -82,6 +84,7 @@ async def update_db(posts: dict):
             'MAL': regex(R_MAL, content),
             'Link': post['link'],
             'Download': links,
+            'ODrive': odrive_links,
             'Tags': [ tags[str(i)] for i in post['categories']]
         }
 

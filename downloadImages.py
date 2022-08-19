@@ -15,15 +15,13 @@ def main():
     db = json.load(file)
 
   downloaded = os.listdir(f"{SCRIPT_PATH}/Imgs")
-
   imgs = dict(
     [ (clean_title(value['Title']), value['Image']) \
     for value in db.values() if f'{clean_title(value["Title"])}.jpg' not in downloaded])
-
   counter = 1
 
   if imgs:
-    print(f"{len(imgs)} Images to download!\n")
+    print(f"\n Downloading {len(imgs)} image(s)!\n")
     for index, value in imgs.items():
       r = requests.get(value)
 
@@ -50,7 +48,7 @@ def main():
     if "-" in "".join(os.listdir()):
       os.system(f'ls | grep -P "\-" | xargs -d"\n" rm')
   
-    print("\n")
+    print()
     os.chdir(SCRIPT_PATH)
 
 def clean_title(str: str):
