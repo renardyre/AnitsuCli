@@ -8,7 +8,7 @@ import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
-T_COLUMNS = os.get_terminal_size().columns // 2
+T_COLUMNS = os.get_terminal_size().columns - 5
 
 def main():
   with open(DB_PATH, 'r') as file:
@@ -21,7 +21,7 @@ def main():
   counter = 1
 
   if imgs:
-    print(f"\n Downloading {len(imgs)} image(s)!\n")
+    print(f"\nDownloading {len(imgs)} image(s)!\n")
     for index, value in imgs.items():
       r = requests.get(value)
 

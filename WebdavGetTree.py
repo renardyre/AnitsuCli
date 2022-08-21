@@ -75,7 +75,10 @@ async def odrive(link, index):
 
     temp = db[index]['Tree']['Dirs']['ODrive']['Files']
     for value in reversed(files['data']['items']):
-        download_url = '/'.join(value['downloadUrl'].split('/')[2:])
+        try:
+            download_url = '/'.join(value['downloadUrl'].split('/')[2:])
+        except:
+            download_url = ''
         temp.append({"Title": value['name'], "Link": download_url})
     
 async def nextcloud(first, link, index, title):
