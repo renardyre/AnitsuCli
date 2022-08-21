@@ -109,7 +109,7 @@ def choose_eps(anime):
 
 def watch(episodes):
     if returnLinks:
-        links = "\n".join([ i["Link"] for i in episodes ])
+        links = "\n".join([ f"https://{i['Link']}" for i in episodes ])
         pyperclip.copy(links)
         print(links)
         exit()
