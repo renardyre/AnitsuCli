@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
+from time import monotonic
 import aiohttp
 import asyncio
 import json
+import html
 import os
 import re
-import html
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
 TAGS_PATH = f"{SCRIPT_PATH}/Tags.json"
-WP_URL = "https://anitsu.com.br/wp-json/wp/v2/posts?per_page=100&page={}"
+LAST_RUN = f"{SCRIPT_PATH}/LastRun.txt"
+NOW = datetime.isoformat(datetime.now())
+START = monotonic()
+WP_URL = "https://anitsu.com.br/wp-json/wp/v2/posts?per_page=100&page={}&modified_after={}"
 CC_TASKS = 10
-T_COLUMNS = os.get_terminal_size().columns - 5
+T_COLUMNS = os.get_terminal_size().columns - 10
 R_NEXTCLOUD = re.compile(r'https?:\/\/(.*?\/nextcloud\/s\/[^\"]{15})')
 R_OCLOUD = re.compile(r'https?:\/\/(www\.odrive\.com\/s\/[^\"]*)')
 R_MAL = re.compile(r'https?:\/\/myanimelist\.net\/anime\/(\d*)?\/[^\\]+')
@@ -20,17 +25,28 @@ R_ANILIST = re.compile(r'https?:\/\/anilist\.co\/anime\/(\d*)?\/[^\\]+')
 R_IMG = re.compile(r'(https?:\/\/.*?\/.*?\.(?:png|jpe?g|webp|gif))')
 
 async def main():
-    global db, tags, counter, t_pages, session
+    global db, tags, counter, t_pages, session, last_run
+    db = {}
+
+    with open(LAST_RUN, 'r+') as fp:
+        last_run = fp.read()
+        fp.seek(0)
+        fp.write(NOW)
+        fp.truncate()
     with open(TAGS_PATH, 'r') as fp:
         tags = json.load(fp)
-    db = {}
+    if os.path.exists("Anitsu.json"):
+        with open(DB_PATH, 'r') as fp:
+            db = json.load(fp)
+    
     counter = 0
     async with aiohttp.ClientSession() as session:
-        async with session.get(WP_URL.format(1)) as r:
+        async with session.get(WP_URL.format(1, last_run)) as r:
             t_pages = int(r.headers['X-WP-TotalPages'])
             t_posts = int(r.headers['X-WP-Total'])
             posts = await r.json()
         if not posts:
+            print(f"Up to date!")
             return
         await update_db(posts)
         print(f"{t_posts} Posts found in {t_pages} pages!\n")
@@ -58,7 +74,7 @@ async def get_data(queue: asyncio.Queue):
     while True:
         page = await queue.get()
         while True:
-            async with session.get(WP_URL.format(page)) as r:
+            async with session.get(WP_URL.format(page, last_run)) as r:
                 st_code = r.status
                 if st_code == 200:
                     posts = await r.json()
@@ -97,11 +113,11 @@ def regex(pattern: re.Pattern, string: str):
 
 def pbar(curr: int):
     prop = curr * 100 // (t_pages-1)
-    text = " => {:3}% [ ".format(prop)
-    remain = T_COLUMNS - len(text)
+    text = f" => {prop:3}% "
+    remain = T_COLUMNS - len(text) - 4
     progress = "|" * (prop * remain // 100)
     blank = " " * (remain - len(progress))
-    print(f"{text}{progress}{blank} ] ", end="\r")
+    print(f"{text}[ {progress}{blank} ] {monotonic() - START:5.2f}s", end="\r")
 
 if __name__ == "__main__":
     asyncio.run(main())

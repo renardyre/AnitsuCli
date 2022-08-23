@@ -2,6 +2,7 @@
 
 from pyfzf.pyfzf import FzfPrompt
 import pyperclip
+import requests
 import argparse
 import json
 import os
@@ -111,6 +112,10 @@ def watch(episodes):
     if returnLinks:
         links = "\n".join([ f"https://{i['Link']}" for i in episodes ])
         pyperclip.copy(links)
+        for i in episodes:
+            payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':['token:TOKEN', [f"https://{i['Link']}"]]}
+            r = requests.post('ARIA_URL', data=json.dumps(payload))
+        print(r)
         print(links)
         exit()
 

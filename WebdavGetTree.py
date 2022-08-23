@@ -2,6 +2,7 @@
 
 from urllib.request import quote, unquote
 from collections import defaultdict
+from time import monotonic
 import aiohttp
 import asyncio
 import json
@@ -13,7 +14,8 @@ SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
 TAGS_PATH = f"{SCRIPT_PATH}/Tags.json"
 CC_TASKS = 100
-T_COLUMNS = os.get_terminal_size().columns - 5
+T_COLUMNS = os.get_terminal_size().columns - 10
+START = monotonic()
 
 async def main():
     global db, total_links, session, counter
@@ -21,7 +23,7 @@ async def main():
     with open(DB_PATH, 'r') as file:
         db = json.load(file)
 
-    total_links = len([ j for i in db.values() for j in i['Download']])
+    total_links = len([ j for i in db.values() for j in i['Download'] + i['ODrive'] if 'Tree' not in i.keys()])
     print(f"\n{total_links} Folders to scan!\n")
   
     if total_links == 0: return
@@ -59,7 +61,8 @@ async def run(queue: asyncio.Queue):
     while True:
         first, link, index, title = await queue.get()
         if 'odrive' in link:
-            await odrive(link, index)
+            pass
+            #await odrive(link, index)
         else:
             await nextcloud(first, link, index, title)
 
@@ -72,7 +75,7 @@ async def odrive(link, index):
     id = link.split('/')[-1]
     async with session.get(OCLOUD_URL.format(id)) as r:
         files = await r.json()
-
+    if 'data' not in files.keys(): return
     temp = db[index]['Tree']['Dirs']['ODrive']['Files']
     for value in reversed(files['data']['items']):
         try:
@@ -130,13 +133,14 @@ async def get_name(link: str):
     return nome
 
 def pbar(curr: int, total: int, title: str):
-    text = f" => {'{:3}'.format(curr * 100 // total)}% {title}"
-    if len(text) < T_COLUMNS:
-        blank = ' ' * (T_COLUMNS - len(text))
+    text = f" => {curr * 100 // total:3}% "
+    remain = T_COLUMNS - len(text)
+    if len(title) < remain:
+        blank = ' ' * (remain - len(title))
     else:
         blank = ''
-        text = text[:T_COLUMNS]
-    print(f"{text}{blank}", end="\r")
+    text += f"{title[:remain]}"
+    print(f"{text}{blank} {monotonic() - START:5.2f}s", end="\r")
 
 def molde():
     return {"Dirs": defaultdict(molde), "Files": []}

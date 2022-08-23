@@ -8,7 +8,7 @@ import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
-T_COLUMNS = os.get_terminal_size().columns - 5
+T_COLUMNS = os.get_terminal_size().columns - 10
 
 def main():
   with open(DB_PATH, 'r') as file:
@@ -30,11 +30,11 @@ def main():
         file.write(r.content)
  
       prop = counter * 100 // len(imgs)
-      text = " => {:3}% [ ".format(prop)
-      remain = T_COLUMNS - len(text)
+      text = f" => {prop:3}% "
+      remain = T_COLUMNS - len(text) - 4
       progress = "|" * (prop * remain // 100)
       blank = " " * (remain - len(progress))
-      print(f"{text}{progress}{blank} ] ", end="\r")
+      print(f"{text}[ {progress}{blank} ] ", end="\r")
       
       os.system(f"convert \'{SCRIPT_PATH}/Imgs/{filename}\' -resize 444x654 \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")
       if ".jpg" not in filename:
