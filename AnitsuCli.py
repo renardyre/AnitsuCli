@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pyfzf.pyfzf import FzfPrompt
+from dotenv import load_dotenv
 import pyperclip
 import requests
 import argparse
@@ -24,6 +25,11 @@ returnLinks = args.links
 multiSelection = args.multi
 oneEpisode = args.one
 selectTags = args.tags
+
+if returnLinks:
+    load_dotenv()
+    ARIA_URL = os.getenv('ARIA_URL')
+    ARIA_TOKEN = os.getenv('ARIA_TOKEN')
 
 script_path = os.path.dirname(__file__)
 fzf_args_img = '-i --reverse --cycle --height 100% --preview-window 0% --preview="' + script_path + '/fzf-img.py {f}"'
@@ -111,11 +117,13 @@ def choose_eps(anime):
 def watch(episodes):
     if returnLinks:
         links = "\n".join([ f"https://{i['Link']}" for i in episodes ])
-        pyperclip.copy(links)
-        for i in episodes:
-            payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':['token:TOKEN', [f"https://{i['Link']}"]]}
-            r = requests.post('ARIA_URL', data=json.dumps(payload))
-        print(r)
+        try: pyperclip.copy(links)
+        except: pass
+        try:
+            for i in episodes:
+                payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]}
+                r = requests.post(ARIA_URL, data=json.dumps(payload))
+        except: pass
         print(links)
         exit()
 

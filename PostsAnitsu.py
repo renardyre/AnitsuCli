@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-from time import monotonic
+from time import monotonic, sleep
+import downloadImages
 import aiohttp
 import asyncio
 import json
@@ -25,8 +26,9 @@ R_ANILIST = re.compile(r'https?:\/\/anilist\.co\/anime\/(\d*)?\/[^\\]+')
 R_IMG = re.compile(r'(https?:\/\/.*?\/.*?\.(?:png|jpe?g|webp|gif))')
 
 async def main():
-    global db, tags, counter, t_pages, session, last_run
+    global db, tags, counter, t_pages, session, last_run, notifications
     db = {}
+    notifications = []
 
     with open(LAST_RUN, 'r+') as fp:
         last_run = fp.read()
@@ -48,11 +50,10 @@ async def main():
         if not posts:
             print(f"Up to date!")
             return
-        await update_db(posts)
         print(f"{t_posts} Posts found in {t_pages} pages!\n")
 
         queue = asyncio.Queue()
-        for page in range(2, t_pages+1):
+        for page in range(1, t_pages+1):
             queue.put_nowait(page)
 
         tasks = []
@@ -69,6 +70,15 @@ async def main():
         
     with open(DB_PATH, 'w') as fp:
         json.dump(db, fp)
+
+    downloadImages.main()
+    for i in notifications:
+        info = db[i]
+        title = clean_title(info['Title'])
+        image = image_path(title)
+        link = info['Link']
+        os.system(f"if [[ $(dunstify --action='default,Reply' 'AnitsuCli' '{title}' -I Imgs/{image}.jpg) -eq 2 ]]; then firefox {link}; fi &")
+        sleep(0.1)
 
 async def get_data(queue: asyncio.Queue):
     while True:
@@ -87,6 +97,7 @@ async def get_data(queue: asyncio.Queue):
 
 async def update_db(posts: dict):
     for post in posts:
+        notifications.append(post['id'])
         content = post['content']['rendered']
         links = re.findall(R_NEXTCLOUD, content)
         odrive_links = re.findall(R_OCLOUD, content)
@@ -112,12 +123,18 @@ def regex(pattern: re.Pattern, string: str):
     return match
 
 def pbar(curr: int):
-    prop = curr * 100 // (t_pages-1)
+    prop = curr * 100 // (t_pages)
     text = f" => {prop:3}% "
     remain = T_COLUMNS - len(text) - 4
     progress = "|" * (prop * remain // 100)
     blank = " " * (remain - len(progress))
     print(f"{text}[ {progress}{blank} ] {monotonic() - START:5.2f}s", end="\r")
+
+def clean_title(str: str):
+  return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
+  
+def image_path(str: str):
+    return re.sub(r'[/:&\(\)\-\"\”\“ ]',"",str)
 
 if __name__ == "__main__":
     asyncio.run(main())

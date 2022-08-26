@@ -3,4 +3,5 @@ OldScripts
 Imgs/*
 Anitsu.json
 .playlist*
+.env
 LastRun.txt

@@ -61,8 +61,7 @@ async def run(queue: asyncio.Queue):
     while True:
         first, link, index, title = await queue.get()
         if 'odrive' in link:
-            pass
-            #await odrive(link, index)
+            await odrive(link, index)
         else:
             await nextcloud(first, link, index, title)
 
