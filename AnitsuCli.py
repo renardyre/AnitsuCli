@@ -32,8 +32,8 @@ if returnLinks:
     ARIA_TOKEN = os.getenv('ARIA_TOKEN')
 
 script_path = os.path.dirname(__file__)
-fzf_args_img = '-i --reverse --cycle --height 100% --preview-window 0% --preview="' + script_path + '/fzf-img.py {f}"'
-fzf_args = '-i --reverse --cycle --height 100%'
+fzf_args_img = '-i -e --reverse --cycle --height 100% --preview-window 0% --preview="' + script_path + '/fzf-img.py {f}"'
+fzf_args = '-i -e --reverse --cycle --height 100%'
 
 with open(f'{script_path}/Anitsu.json', 'r') as file:
     database = json.load(file)
