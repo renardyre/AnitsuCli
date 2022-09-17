@@ -84,6 +84,7 @@ async def odrive(link, index):
         temp.append({"Title": value['name'], "Link": download_url})
     
 async def nextcloud(first, link, index, title):
+    link = link.replace('anitsu.com.br', 'anitsu.moe')
     id = link.split('/')[-1]
     url = f'https://{link.split("/")[0]}/nextcloud/public.php/webdav'
     headers = {'Depth': 'infinity'}
@@ -128,7 +129,7 @@ async def get_files(paths: list, link: str, first: bool, index: str):
 async def get_name(link: str):
     async with session.get(f"https://{link}") as r:
         texto = await r.text()
-        nome = re.findall(r'\<h1 class\=\"header\-appname\"\>\s+(.*)\s+\<\/h1\>', texto.replace('\n',''))[0].strip()
+        nome = re.findall(r'\<h1 class\=\"header\-appname\"\>\s*(.*)\s*\<\/h1\>', texto.replace('\n',''))[0].strip()
     return nome
 
 def pbar(curr: int, total: int, title: str):
