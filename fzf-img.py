@@ -15,7 +15,7 @@ def main():
 
     if index == "..": exit()
 
-    os.system(f"feh {SCRIPT_PATH}/Imgs/{index}.jpg \
+    os.system(f"feh \'{SCRIPT_PATH}/Imgs/{index}.jpg\' \
         --scale-down --auto-zoom -q -x --image-bg black -g 444x653 --class FloatingFeh > /dev/null 2>&1 &")
 
 if __name__ == "__main__":

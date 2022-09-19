@@ -37,20 +37,11 @@ def main():
       blank = " " * (remain - len(progress))
       print(f"{text}[ {progress}{blank} ] ", end="\r")
       
-      os.system(f"convert \'{SCRIPT_PATH}/Imgs/{filename}\' -resize 444x654 \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")
+      os.system(f"convert \'{SCRIPT_PATH}/Imgs/{filename}[0]\' -resize 444x654 \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")
       if ".jpg" not in filename:
-        os.system(f"rm {SCRIPT_PATH}/Imgs/{filename}")
-
-      if f"{index}-0.jpg" in os.listdir(f"{SCRIPT_PATH}/Imgs"):
-        os.system(f"mv \'{SCRIPT_PATH}/Imgs/{index}-0.jpg\' \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")    
-      counter += 1
-
-    os.chdir(f"{SCRIPT_PATH}/Imgs")
-    if "-" in "".join(os.listdir()):
-      os.system(f'ls | grep -P "\-" | xargs -d"\n" rm')
+        os.system(f"rm \'{SCRIPT_PATH}/Imgs/{filename}\'")
   
     print()
-    os.chdir(SCRIPT_PATH)
 
 def clean_title(str: str):
   clean_title = re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
