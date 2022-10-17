@@ -72,6 +72,7 @@ async def main():
         json.dump(db, fp)
 
     downloadImages.main()
+    if len(notifications) > 100: return
     for i in notifications:
         info = db[i]
         title = clean_title(info['Title'])

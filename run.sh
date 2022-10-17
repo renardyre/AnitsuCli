@@ -4,6 +4,13 @@ function cleanup() {
     tput cnorm
 }
 
+if [[ $1 == 'full' ]]; then
+    rm -f Anitsu.json
+    echo "2000-01-01T00:00:00" > LastRun.txt
+fi
+
+
+
 trap cleanup EXIT
 clear
 tput civis
