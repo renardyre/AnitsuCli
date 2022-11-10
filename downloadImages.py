@@ -36,7 +36,7 @@ def main():
       progress = "|" * (prop * remain // 100)
       blank = " " * (remain - len(progress))
       print(f"{text}[ {progress}{blank} ] ", end="\r")
-      
+      counter += 1
       os.system(f"convert \'{SCRIPT_PATH}/Imgs/{filename}[0]\' -resize 444x654 \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")
       if ".jpg" not in filename:
         os.system(f"rm \'{SCRIPT_PATH}/Imgs/{filename}\'")

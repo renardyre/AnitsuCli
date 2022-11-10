@@ -124,7 +124,7 @@ async def get_files(paths: list, link: str, first: bool, index: str):
             url += quote(i) + "/"
             temp = temp['Dirs'][i]
 
-        temp['Files'].append({"Title": path[-1], "Link": f"{url}/{quote(path[-1])}"})
+        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}"})
 
 async def get_name(link: str):
     async with session.get(f"https://{link}") as r:
