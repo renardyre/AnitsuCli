@@ -77,7 +77,7 @@ def choose_eps(anime):
 
     while not choosed:
 
-        dirs = [ f"ﱮ {dir}" for dir in file_tree['Dirs'].keys() ]
+        dirs = [ f" {dir}" for dir in file_tree['Dirs'].keys() ]
         files = [ file['Title'] for file in file_tree['Files'] ]
 
         if multiSelection:
