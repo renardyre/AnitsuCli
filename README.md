@@ -1,6 +1,11 @@
 # AnitsuCli
 
-#### Install Requirements and Create the DataBase:
+### Dependencies
+- fzf
+- feh
+- mpv
+
+### Install Requirements and Create the DataBase:
 
 ```bash
 pip install -r requirements.txt
@@ -9,7 +14,7 @@ chmod +x *py
 ./run.sh
 ```
 
-#### Run AnitsuCli
+### Run AnitsuCli
 
 ```
 ./AnitsuCli.py --help
