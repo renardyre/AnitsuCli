@@ -98,11 +98,11 @@ async def get_data(queue: asyncio.Queue):
 
 async def update_db(posts: dict):
     for post in posts:
-        notifications.append(post['id'])
         content = post['content']['rendered']
         links = re.findall(R_NEXTCLOUD, content)
         odrive_links = re.findall(R_OCLOUD, content)
         if not links and not odrive_links: continue
+        notifications.append(post['id'])
         db[post['id']] = {
             'Title': html.unescape(post['title']['rendered']),
             'Image': regex(R_IMG, content),
