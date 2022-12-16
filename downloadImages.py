@@ -17,8 +17,8 @@ def main():
 
   downloaded = os.listdir(f"{SCRIPT_PATH}/Imgs")
   imgs = dict(
-    [ (clean_title(value['Title']), value['Image']) \
-    for value in db.values() if f'{clean_title(value["Title"])}.jpg' not in downloaded])
+    [ (index, value['Image']) \
+    for index, value in db.items() if f'{index}.jpg' not in downloaded])
   counter = 1
 
   if imgs:
@@ -37,15 +37,11 @@ def main():
       blank = " " * (remain - len(progress))
       print(f"{text}[ {progress}{blank} ] ", end="\r")
       counter += 1
-      os.system(f"convert \'{SCRIPT_PATH}/Imgs/{filename}[0]\' -resize 444x654 \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")
+      os.system(f"convert \'{SCRIPT_PATH}/Imgs/{filename}[0]\' -resize 222x326^ \'{SCRIPT_PATH}/Imgs/{index}.jpg\'")
       if ".jpg" not in filename:
         os.system(f"rm \'{SCRIPT_PATH}/Imgs/{filename}\'")
   
     print()
-
-def clean_title(str: str):
-  clean_title = re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
-  return re.sub(r'[/:&\(\)\-\"\”\“ ]',"",clean_title)
 
 if __name__ == "__main__":
   main()
