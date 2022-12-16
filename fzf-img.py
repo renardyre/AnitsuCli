@@ -9,14 +9,18 @@ SCRIPT_PATH = os.path.dirname(__file__)
 def main():
     arg = sys.argv
     with open(arg[1], 'r') as f:
-        clean_title = f.read().strip()
-        index = re.sub(r'[/:&\(\)\-\"\”\“ ]',"",clean_title.strip())
+        choose = f.read().strip().split('\t')
     os.system("pkill feh")
 
-    if index == "..": exit()
+    index = choose[0]
+    if index == "..": return
+
+    print('\n'*20)
+    text = choose[1].replace('NeLi', '\n')
+    print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
 
     os.system(f"feh \'{SCRIPT_PATH}/Imgs/{index}.jpg\' \
-        --scale-down --auto-zoom -q -x --image-bg black -g 444x653 --class FloatingFeh > /dev/null 2>&1 &")
+        --scale-down --auto-zoom -q -x --image-bg black --class FloatingFeh > /dev/null 2>&1 &")
 
 if __name__ == "__main__":
     main()

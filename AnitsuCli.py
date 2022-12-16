@@ -32,8 +32,8 @@ if returnLinks:
     ARIA_TOKEN = os.getenv('ARIA_TOKEN')
 
 script_path = os.path.dirname(__file__)
-fzf_args_img = '-i -e --reverse --cycle --height 100% --preview-window 0% --preview="' + script_path + '/fzf-img.py {f}"'
-fzf_args = '-i -e --reverse --cycle --height 100%'
+fzf_args_img = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100% --preview-window="right,60%,border-left,wrap" --preview="' + script_path + '/fzf-img.py {f}"'
+fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
 
 with open(f'{script_path}/Anitsu.json', 'r') as file:
     database = json.load(file)
@@ -50,24 +50,27 @@ if selectTags:
     tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
 def choose_anime():
-
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
     if selectTags: 
-        db = [ database[str(i)] for i in keys if "Tags" in database[str(i)] and set(tags) & set(database[str(i)]["Tags"])]
+        titulosAnimes = [  f"{str(i)}\t{database[str(i)]['Description']}\t{clean_title(database[str(i)]['Title'])}" \
+        for i in keys if "Tags" in database[str(i)] and set(tags) & set(database[str(i)]["Tags"])]
     else:
-        db = [ database[str(i)] for i in keys ]
-    titulosAnimes = [ clean_title(i['Title']) for i in db ]
+        titulosAnimes = [  f"{str(i)}\t{database[str(i)]['Description']}\t{clean_title(database[str(i)]['Title'])}" \
+        for i in keys ]
+    
     os.system('clear')
 
     if showImages:
-        escolha = fzf.prompt(titulosAnimes+['..'], fzf_args_img)[0]
+        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args_img)[0]
     else:
-        escolha = fzf.prompt(titulosAnimes+['..'], fzf_args)[0]
+        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args)[0]
 
-    if escolha == '..': exit(0)
-    index = titulosAnimes.index(escolha)
-  
-    return db[int(index)]
+    if escolha == '..\t..':
+        os.system("pkill feh")
+        exit(0)
+
+    index = escolha.split('\t')[0]
+    return (database[index], index)
 
 def choose_eps(anime):
     choosed = False
@@ -81,7 +84,7 @@ def choose_eps(anime):
         files = [ file['Title'] for file in file_tree['Files'] ]
 
         if multiSelection:
-            choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m")
+            choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind ctrl-a:toggle-all+last+toggle+first")
         else:	
             choose = fzf.prompt(dirs+files+['..'], fzf_args)
 
@@ -141,21 +144,18 @@ def watch(episodes):
 
 def main():
     while True:
-        anime = choose_anime()
-        image = re.sub(r'[/:&\(\)\-\"\”\“ ]',"", clean_title(anime["Title"]))
+        anime, image = choose_anime()
         title = clean_title(anime["Title"])
-        episodes = choose_eps(anime)
         if showImages:
             os.system('pkill feh')
+        episodes = choose_eps(anime)
         if episodes:
             if not returnLinks:
                 os.system(f"dunstify 'AnitsuCli: Started playing' '{title}' -I {script_path}/Imgs/{image}.jpg")
             watch(episodes)
 
-
 def clean_title(str: str):
     return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
-
 
 if __name__ == "__main__":
     main()
