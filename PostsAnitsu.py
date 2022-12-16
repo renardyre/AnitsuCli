@@ -40,7 +40,7 @@ async def main():
     if os.path.exists("Anitsu.json"):
         with open(DB_PATH, 'r') as fp:
             db = json.load(fp)
-    
+
     counter = 0
     async with aiohttp.ClientSession() as session:
         async with session.get(WP_URL.format(1, last_run)) as r:
@@ -67,16 +67,18 @@ async def main():
             task.cancel()
 
         await asyncio.gather(*tasks, return_exceptions=True)
-        
+
     with open(DB_PATH, 'w') as fp:
         json.dump(db, fp)
 
     downloadImages.main()
     if len(notifications) > 100: return
+    print()
     for i in notifications:
         info = db[i]
+        print(f"- {info['Title']}")
         title = clean_title(info['Title'])
-        image = image_path(title)
+        image = i
         link = info['Link']
         os.system(f"if [[ $(dunstify --action='default,Reply' 'AnitsuCli' '{title}' -I Imgs/{image}.jpg) -eq 2 ]]; then firefox {link}; fi &")
         sleep(0.1)
@@ -106,6 +108,7 @@ async def update_db(posts: dict):
         db[post['id']] = {
             'Title': html.unescape(post['title']['rendered']),
             'Image': regex(R_IMG, content),
+            'Description': description(post['content']['rendered']),
             'Date': post['date'],
             'Modified': post['modified'],
             'Anilist': regex(R_ANILIST, content),
@@ -131,11 +134,16 @@ def pbar(curr: int):
     blank = " " * (remain - len(progress))
     print(f"{text}[ {progress}{blank} ] {monotonic() - START:5.2f}s", end="\r")
 
+def description(text: str):
+    desc = html.unescape(text)
+    items = desc.split('<hr />')
+    if len(items) < 3: return ''
+    info = re.sub(r'\<.*?\>', '', items[0]).strip().replace('\n', 'NeLi')
+    sinopse = re.sub(r'\<.*?\>', '', items[1]).strip().replace('\n', 'NeLi')
+    return f"{info}NeLiNeLi{sinopse}"
+
 def clean_title(str: str):
   return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
-  
-def image_path(str: str):
-    return re.sub(r'[/:&\(\)\-\"\”\“ ]',"",str)
 
 if __name__ == "__main__":
     asyncio.run(main())
