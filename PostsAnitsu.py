@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from time import monotonic, sleep
+from dotenv import load_dotenv
 import downloadImages
 import aiohttp
 import asyncio
@@ -24,11 +25,17 @@ R_OCLOUD = re.compile(r'https?:\/\/(www\.odrive\.com\/s\/[^\"]*)')
 R_MAL = re.compile(r'https?:\/\/myanimelist\.net\/anime\/(\d*)?\/[^\\]+')
 R_ANILIST = re.compile(r'https?:\/\/anilist\.co\/anime\/(\d*)?\/[^\\]+')
 R_IMG = re.compile(r'(https?:\/\/.*?\/.*?\.(?:png|jpe?g|webp|gif))')
+R_PASSWD = re.compile(r'Senha: \<span.*?\>(.*)\<\/span\>')
 
 async def main():
-    global db, tags, counter, t_pages, session, last_run, notifications
+    global db, tags, counter, t_pages, session, last_run, notifications, auth
     db = {}
     notifications = []
+
+    load_dotenv()
+    username = os.getenv("USERNAME")
+    passwd = os.getenv("PASSWD")
+    auth = aiohttp.BasicAuth(username, passwd)
 
     with open(LAST_RUN, 'r+') as fp:
         last_run = fp.read()
@@ -43,7 +50,7 @@ async def main():
 
     counter = 0
     async with aiohttp.ClientSession() as session:
-        async with session.get(WP_URL.format(1, last_run)) as r:
+        async with session.get(WP_URL.format(1, last_run), auth=auth) as r:
             t_pages = int(r.headers['X-WP-TotalPages'])
             t_posts = int(r.headers['X-WP-Total'])
             posts = await r.json()
@@ -87,7 +94,7 @@ async def get_data(queue: asyncio.Queue):
     while True:
         page = await queue.get()
         while True:
-            async with session.get(WP_URL.format(page, last_run)) as r:
+            async with session.get(WP_URL.format(page, last_run), auth=auth) as r:
                 st_code = r.status
                 if st_code == 200:
                     posts = await r.json()
@@ -111,6 +118,7 @@ async def update_db(posts: dict):
             'Description': description(post['content']['rendered']),
             'Date': post['date'],
             'Modified': post['modified'],
+            'Password': regex(R_PASSWD, post['content']['rendered']),
             'Anilist': regex(R_ANILIST, content),
             'MAL': regex(R_MAL, content),
             'Link': post['link'],
@@ -137,7 +145,7 @@ def pbar(curr: int):
 def description(text: str):
     desc = html.unescape(text)
     items = desc.split('<hr />')
-    if len(items) < 3: return ''
+    if len(items) < 2: return ''
     info = re.sub(r'\<.*?\>', '', items[0]).strip().replace('\n', 'NeLi')
     sinopse = re.sub(r'\<.*?\>', '', items[1]).strip().replace('\n', 'NeLi')
     return f"{info}NeLiNeLi{sinopse}"

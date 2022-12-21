@@ -38,9 +38,9 @@ async def main():
       
             for i, link in enumerate(value["Download"] + value['ODrive']):
                 if i == 0:
-                    queue.put_nowait((True, link, index, value['Title']))
+                    queue.put_nowait((True, link, index, value['Title'], value['Password']))
                 else:
-                    queue.put_nowait((False, link, index, value['Title']))
+                    queue.put_nowait((False, link, index, value['Title'], value['Password']))
 
         tasks = []
         for _ in range(CC_TASKS):
@@ -59,11 +59,11 @@ async def main():
 
 async def run(queue: asyncio.Queue):
     while True:
-        first, link, index, title = await queue.get()
+        first, link, index, title, passwd = await queue.get()
         if 'odrive' in link:
             await odrive(link, index)
         else:
-            await nextcloud(first, link, index, title)
+            await nextcloud(first, link, index, title, passwd)
 
         global counter
         counter += 1
@@ -83,12 +83,12 @@ async def odrive(link, index):
             download_url = ''
         temp.append({"Title": value['name'], "Link": download_url})
     
-async def nextcloud(first, link, index, title):
+async def nextcloud(first, link, index, title, passwd):
     link = link.replace('anitsu.com.br', 'anitsu.moe')
     id = link.split('/')[-1]
     url = f'https://{link.split("/")[0]}/nextcloud/public.php/webdav'
     headers = {'Depth': 'infinity'}
-    auth = aiohttp.BasicAuth(id, '')
+    auth = aiohttp.BasicAuth(id, passwd)
 
     async with session.request(method="PROPFIND", url=url, headers=headers, auth=auth) as r:
         if r.status != 207: print('\n' + title + '\n')
