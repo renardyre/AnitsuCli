@@ -5,6 +5,15 @@
 - feh
 - mpv
 
+### Create .env file:
+
+```
+USERNAME=""
+PASSWD=""
+ARIA_URL=""     #Optional 
+ARIA_TOKEN=""   #Optional
+```
+
 ### Install Requirements and Create the DataBase:
 
 ```bash
