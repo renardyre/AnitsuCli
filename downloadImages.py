@@ -15,6 +15,7 @@ def main():
   with open(DB_PATH, 'r') as file:
     db = json.load(file)
 
+  if not os.path.exists(f"{SCRIPT_PATH}/Imgs"): return
   downloaded = os.listdir(f"{SCRIPT_PATH}/Imgs")
   imgs = dict(
     [ (index, value['Image']) \

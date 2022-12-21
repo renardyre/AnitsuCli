@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from distutils.spawn import find_executable
 import sys
 import os
 import re
@@ -14,13 +15,16 @@ def main():
 
     index = choose[0]
     if index == "..": return
+    feh = find_executable('feh')
 
-    print('\n'*20)
+    print('\n')
+    if feh: print('\n'*18)
     text = choose[1].replace('NeLi', '\n')
     print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
 
-    os.system(f"feh \'{SCRIPT_PATH}/Imgs/{index}.jpg\' \
-        --scale-down --auto-zoom -q -x --image-bg black --class FloatingFeh > /dev/null 2>&1 &")
+    if feh:
+        os.system(f"feh \'{SCRIPT_PATH}/Imgs/{index}.jpg\' \
+            --scale-down --auto-zoom -q -x --image-bg black --class FloatingFeh > /dev/null 2>&1 &")
 
 if __name__ == "__main__":
     main()

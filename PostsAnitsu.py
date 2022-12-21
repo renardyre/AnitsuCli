@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
+from distutils.spawn import find_executable
 from time import monotonic, sleep
 from dotenv import load_dotenv
+from datetime import datetime
 import downloadImages
 import aiohttp
 import asyncio
@@ -79,16 +80,17 @@ async def main():
         json.dump(db, fp)
 
     downloadImages.main()
-    if len(notifications) > 100: return
     print()
-    for i in notifications:
-        info = db[i]
-        print(f"- {info['Title']}")
-        title = clean_title(info['Title'])
-        image = i
-        link = info['Link']
-        os.system(f"if [[ $(dunstify --action='default,Reply' 'AnitsuCli' '{title}' -I Imgs/{image}.jpg) -eq 2 ]]; then firefox {link}; fi &")
-        sleep(0.1)
+    if len(notifications) < 100:
+        for i in notifications:
+            info = db[i]
+            print(f"- {info['Title']}")
+            if find_executable('dunstify'):
+                title = clean_title(info['Title'])
+                image = i
+                link = info['Link']
+                os.system(f"if [[ $(dunstify --action='default,Reply' 'AnitsuCli' '{title}' -I Imgs/{image}.jpg) -eq 2 ]]; then firefox {link}; fi &")
+            sleep(0.1)
 
 async def get_data(queue: asyncio.Queue):
     while True:

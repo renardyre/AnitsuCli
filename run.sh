@@ -16,6 +16,6 @@ clear
 tput civis
 
 python3 PostsAnitsu.py
-dunstify "AnitsuCli" "Atualização da Lista de Animes Completa" -I Imgs/LogoAnitsu.png
+dunstify "AnitsuCli" "Atualização da Lista de Animes Completa" -I Imgs/LogoAnitsu.png > /dev/null 2>&1
 python3 WebdavGetTree.py
-dunstify "AnitsuCli" "Base de Dados Atulizada com Sucesso!" -I Imgs/LogoAnitsu.png
+dunstify "AnitsuCli" "Base de Dados Atulizada com Sucesso!" -I Imgs/LogoAnitsu.png > /dev/null 2>&1
