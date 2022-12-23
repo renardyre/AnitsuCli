@@ -18,7 +18,7 @@ TAGS_PATH = f"{SCRIPT_PATH}/Tags.json"
 LAST_RUN = f"{SCRIPT_PATH}/LastRun.txt"
 NOW = datetime.isoformat(datetime.now())
 START = monotonic()
-WP_URL = "https://anitsu.moe/wp-json/wp/v2/posts?per_page=100&page={}&modified_after={}"
+WP_URL = "https://anitsu.moe/wp-json/wp/v2/posts?per_page=100&page={}&modified_after={}&_fields=id,date,modified,link,title,content,categories"
 CC_TASKS = 10
 T_COLUMNS = os.get_terminal_size().columns - 10
 R_NEXTCLOUD = re.compile(r'https?:\/\/(.*?\/nextcloud\/s\/[^\"]{15})')
