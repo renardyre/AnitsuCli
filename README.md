@@ -1,9 +1,12 @@
 # AnitsuCli
 
-### Dependencies
-- fzf
-- feh
-- mpv
+![preview](preview.gif)
+
+### Third-Party Dependencies
+- [fzf](https://github.com/junegunn/fzf)
+- [imagemagick](https://github.com/ImageMagick/ImageMagick)
+- [feh](https://github.com/derf/feh)
+- [mpv](https://github.com/mpv-player/mpv)
 
 ### Create .env file:
 
@@ -28,3 +31,5 @@ chmod +x *py
 ```
 ./AnitsuCli.py --help
 ```
+
+![help](usage.png)
