@@ -5,8 +5,10 @@
 ### Third-Party Dependencies
 - [fzf](https://github.com/junegunn/fzf)
 - [imagemagick](https://github.com/ImageMagick/ImageMagick)
-- [feh](https://github.com/derf/feh)
-- [mpv](https://github.com/mpv-player/mpv)
+- [feh](https://github.com/derf/feh)*
+- [mpv](https://github.com/mpv-player/mpv)*
+
+*Image preview support (Optional)
 
 ### Create .env file:
 
