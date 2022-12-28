@@ -38,14 +38,21 @@ async def main():
     passwd = os.getenv("ANITSU_PASSWD")
     auth = aiohttp.BasicAuth(username, passwd)
 
-    with open(LAST_RUN, 'r+') as fp:
-        last_run = fp.read()
-        fp.seek(0)
-        fp.write(NOW)
-        fp.truncate()
+    if os.path.exists(LAST_RUN):
+        with open(LAST_RUN, 'r+') as fp:
+            last_run = fp.read()
+            fp.seek(0)
+            fp.write(NOW)
+            fp.truncate()
+    else:
+        with open(LAST_RUN, 'w') as fp:
+            last_run = "2000-01-01T00:00:00"
+            fp.write(last_run)
+
     with open(TAGS_PATH, 'r') as fp:
         tags = json.load(fp)
-    if os.path.exists("Anitsu.json"):
+
+    if os.path.exists(DB_PATH):
         with open(DB_PATH, 'r') as fp:
             db = json.load(fp)
 
