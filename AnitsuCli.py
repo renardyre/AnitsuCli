@@ -2,6 +2,7 @@
 
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
+from shutil import which
 import pyperclip
 import requests
 import argparse
@@ -139,8 +140,11 @@ def watch(episodes):
             pl.write('#EXTM3U\n')
             for ep in episodes:
                 pl.write(f"#EXTINF:0, {ep['Title']}\nhttps://{ep['Link']}\n")
-        os.system('i3-msg -q workspace "5. "')
-        os.system(f"mpv --fs --playlist={script_path}/.playlist.m3u")
+        if which("mpv"):
+            os.system(f"mpv --fs --playlist={script_path}/.playlist.m3u")
+        else:
+            print("Mpv not installed, please install to reproduce the files!")
+            exit()
 
 def main():
     while True:
@@ -150,7 +154,7 @@ def main():
             os.system('pkill feh')
         episodes = choose_eps(anime)
         if episodes:
-            if not returnLinks:
+            if not returnLinks and which("dunstify"):
                 os.system(f"dunstify 'AnitsuCli: Started playing' '{title}' -I {script_path}/Imgs/{image}.jpg")
             watch(episodes)
 
