@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from distutils.spawn import find_executable
+from shutil import which
 from time import monotonic, sleep
 from dotenv import load_dotenv
 from datetime import datetime
@@ -85,7 +85,7 @@ async def main():
         for i in notifications:
             info = db[i]
             print(f"- {info['Title']}")
-            if find_executable('dunstify'):
+            if which('dunstify'):
                 title = clean_title(info['Title'])
                 image = i
                 link = info['Link']

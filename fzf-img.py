@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from distutils.spawn import find_executable
+from shutil import which
 import sys
 import os
 import re
@@ -15,7 +15,7 @@ def main():
 
     index = choose[0]
     if index == "..": return
-    feh = find_executable('feh')
+    feh = which('feh')
 
     print('\n')
     if feh: print('\n'*18)
