@@ -8,17 +8,18 @@ import re
 SCRIPT_PATH = os.path.dirname(__file__)
 
 def main():
-    arg = sys.argv
-    with open(arg[1], 'r') as f:
-        choose = f.read().strip().split('\t')
-    os.system("pkill feh")
+    arg = sys.argv[1:]
+    choose = arg[0].strip().split('\t')
+
+    feh = which('feh')
+    if which(feh):
+        os.system("pkill feh")
+        print('\n'*18)
 
     index = choose[0]
     if index == "..": return
-    feh = which('feh')
 
     print('\n')
-    if feh: print('\n'*18)
     text = choose[1].replace('NeLi', '\n')
     print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
 
