@@ -34,8 +34,8 @@ async def main():
     notifications = []
 
     load_dotenv()
-    username = os.getenv("USERNAME")
-    passwd = os.getenv("PASSWD")
+    username = os.getenv("ANITSU_USERNAME")
+    passwd = os.getenv("ANITSU_PASSWD")
     auth = aiohttp.BasicAuth(username, passwd)
 
     with open(LAST_RUN, 'r+') as fp:

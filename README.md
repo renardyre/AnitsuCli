@@ -11,8 +11,8 @@
 ### Create .env file:
 
 ```
-USERNAME=""
-PASSWD=""
+ANITSU_USERNAME=""
+ANITSU_PASSWD=""
 ARIA_URL=""     #Optional 
 ARIA_TOKEN=""   #Optional
 ```
