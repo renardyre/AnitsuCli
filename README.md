@@ -1,6 +1,5 @@
 # AnitsuCli
-
-![preview](preview.gif)
+![Cover](https://cdn.discordapp.com/attachments/1028636320190443570/1028636414025420872/unknown.png)
 
 ### Third-Party Dependencies
 - [fzf](https://github.com/junegunn/fzf)
@@ -32,4 +31,4 @@ chmod +x *py
 ./AnitsuCli.py
 ```
 
-![help](usage.png)
+![preview](preview.gif)
