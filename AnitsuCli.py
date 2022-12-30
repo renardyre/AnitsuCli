@@ -17,7 +17,9 @@ parser.add_argument('-l', '--links', action='store_true', help='Em vez de reprod
 parser.add_argument('-m', '--multi', action='store_true', help='Habilita seleção multipla de episódios')
 parser.add_argument('-o', '--one', action='store_true', help='Reproduz apenas um episódio')
 parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
+parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
 
+script_path = os.path.dirname(__file__)
 args = parser.parse_args()
 
 player = args.player
@@ -26,13 +28,19 @@ returnLinks = args.links
 multiSelection = args.multi
 oneEpisode = args.one
 selectTags = args.tags
+update = args.update
+
+if update:
+    commands = ['clear', 'tput civis', 'python3 PostsAnitsu.py', 'python3 WebdavGetTree.py', 'tput cnorm']
+    for c in commands:
+        os.system(c)
+    exit()
 
 if returnLinks:
     load_dotenv()
     ARIA_URL = os.getenv('ARIA_URL')
     ARIA_TOKEN = os.getenv('ARIA_TOKEN')
 
-script_path = os.path.dirname(__file__)
 fzf_args_img = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100% --preview-window="right,60%,border-left,wrap" --preview="' + script_path + '/fzf-img.py {}"'
 fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
 
