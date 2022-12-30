@@ -54,7 +54,7 @@ async def main():
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-        with open('Anitsu.json', 'w') as file:
+        with open(DB_PATH, 'w') as file:
             json.dump(db, file)
 
 async def run(queue: asyncio.Queue):
