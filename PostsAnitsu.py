@@ -96,7 +96,7 @@ async def main():
                 title = clean_title(info['Title'])
                 image = i
                 link = info['Link']
-                os.system(f"if [[ $(dunstify --action='default,Reply' 'AnitsuCli' '{title}' -I Imgs/{image}.jpg) -eq 2 ]]; then firefox {link}; fi &")
+                os.system(f"if [[ $(dunstify --action='default,Reply' 'AnitsuCli' '{title}' -I {SCRIPT_PATH}/Imgs/{image}.jpg) -eq 2 ]]; then firefox {link}; fi &")
             sleep(0.1)
 
 async def get_data(queue: asyncio.Queue):
