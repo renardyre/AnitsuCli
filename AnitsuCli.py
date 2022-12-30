@@ -30,8 +30,8 @@ oneEpisode = args.one
 selectTags = args.tags
 update = args.update
 
-if update:
-    commands = ['clear', 'tput civis', 'python3 PostsAnitsu.py', 'python3 WebdavGetTree.py', 'tput cnorm']
+if update or not os.path.exists(f"{script_path}/Anitsu.json"):
+    commands = ['clear', 'tput civis', f'python3 {script_path}/PostsAnitsu.py', f'python3 {script_path}/WebdavGetTree.py', 'tput cnorm']
     for c in commands:
         os.system(c)
     exit()

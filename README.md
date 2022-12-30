@@ -4,34 +4,35 @@
 
 ### Third-Party Dependencies
 - [fzf](https://github.com/junegunn/fzf)
-- [imagemagick](https://github.com/ImageMagick/ImageMagick)
+- [mpv](https://github.com/mpv-player/mpv)
 - [feh](https://github.com/derf/feh)*
-- [mpv](https://github.com/mpv-player/mpv)*
+- [aria2](https://github.com/aria2/aria2)*
+- [imagemagick](https://github.com/ImageMagick/ImageMagick)*
 
-*Image preview support (Optional)
+*Optional
 
-### Create .env file:
+## Setup
 
-```
+### Create .env file
+
+```env
 ANITSU_USERNAME=""
 ANITSU_PASSWD=""
 ARIA_URL=""     #Optional 
 ARIA_TOKEN=""   #Optional
 ```
 
-### Install Requirements and Create the DataBase:
+### Install Requirements
 
 ```bash
 pip install -r requirements.txt
-chmod +x run.sh
 chmod +x *py
-./run.sh
 ```
 
 ### Run AnitsuCli
 
-```
-./AnitsuCli.py --help
+```bash
+./AnitsuCli.py
 ```
 
 ![help](usage.png)
