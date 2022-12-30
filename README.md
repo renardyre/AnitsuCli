@@ -22,16 +22,13 @@ ARIA_URL=""     #Optional
 ARIA_TOKEN=""   #Optional
 ```
 
-### Install Requirements
+### Install Requirements and Run
 
 ```bash
+git clone https://github.com/renardyre/AnitsuCli
+cd AnitsuCli
 pip install -r requirements.txt
 chmod +x *py
-```
-
-### Run AnitsuCli
-
-```bash
 ./AnitsuCli.py
 ```
 
