@@ -3,6 +3,8 @@
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
 from shutil import which
+from time import sleep
+import subprocess as sp
 import pyperclip
 import requests
 import argparse
@@ -21,6 +23,7 @@ parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
+FZF_IMG = '/tmp/Anitsu.jpg'
 args = parser.parse_args()
 
 player = args.player
@@ -59,6 +62,12 @@ if selectTags:
     if '..' in tags: exit()
     tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
+
+def start_feh():
+    os.system(f'convert xc:black -size 1x1 {FZF_IMG}')
+    os.system(f'feh {FZF_IMG} --scale-down --auto-zoom -q -x --image-bg black --class FloatingFeh >/dev/null 2>&1 &')
+
+
 def choose_anime():
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
     if selectTags: 
@@ -70,14 +79,19 @@ def choose_anime():
     
     os.system('clear')
 
-    if showImages:
-        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args_img)[0]
-    else:
-        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args)[0]
-
-    if escolha == '..\t..':
-        os.system("pkill feh")
-        exit(0)
+    try:
+        if showImages:
+            start_feh()
+            escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args_img)[0]
+        else:
+            escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args)[0]
+    finally:
+        try:
+            os.system("pkill feh")
+        except:
+            pass
+        if escolha == '..\t..':
+            exit(0)
 
     index = escolha.split('\t')[0]
     return (database[index], index)
