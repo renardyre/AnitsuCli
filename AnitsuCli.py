@@ -22,7 +22,8 @@ parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
-FZF_IMG = '/tmp/Anitsu.jpg'
+FZF_IMG = os.path.join(SCRIPT_PATH, ".fzf_img.jpg")
+FZF_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 args = parser.parse_args()
 
 player = args.player
@@ -64,7 +65,9 @@ if selectTags:
 
 def start_feh():
     os.system(f'convert xc:black -size 1x1 {FZF_IMG}')
-    os.system(f'feh {FZF_IMG} --scale-down --auto-zoom -q -x --image-bg black --class FloatingFeh >/dev/null 2>&1 &')
+    with open(FZF_IMG_LIST, 'w') as fp:
+        fp.write(FZF_IMG)
+    os.system(f'feh -f {FZF_IMG_LIST} --scale-down --reload 0.1 --auto-zoom -q -x --image-bg black --class FloatingFeh >/dev/null 2>&1 &')
 
 
 def choose_anime():

@@ -6,8 +6,8 @@ import sys
 import os
 import re
 
-FZF_IMG = '/tmp/Anitsu.jpg'
 SCRIPT_PATH = os.path.dirname(__file__)
+FZF_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 
 def main():
     arg = sys.argv[1:]
@@ -19,10 +19,8 @@ def main():
         print('\n'*18)
         img = os.path.join(SCRIPT_PATH, 'Imgs', f'{index}.jpg')
         if os.path.exists(img): 
-            sleep(0.3)
-            copy(img, FZF_IMG)
-            sleep(0.3)
-            os.system(f'touch {FZF_IMG}')
+            with open(FZF_IMG_LIST, 'w') as fp:
+                fp.write(img)
 
     print('\n')
     text = choose[1].replace('NeLi', '\n')

@@ -1,8 +1,10 @@
 __pycache__
 OldScripts
-Imgs/*
+Imgs
 Anitsu.json
 .playlist*
 .env
+.fzf_img.jpg
+.img_list
 LastRun.txt
 venv
