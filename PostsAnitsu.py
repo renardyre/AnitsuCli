@@ -13,9 +13,9 @@ import os
 import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
-DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
-TAGS_PATH = f"{SCRIPT_PATH}/Tags.json"
-LAST_RUN = f"{SCRIPT_PATH}/LastRun.txt"
+DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
+TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
+LAST_RUN =  os.path.join(SCRIPT_PATH, "LastRun.txt")
 NOW = datetime.isoformat(datetime.now())
 START = monotonic()
 WP_URL = "https://anitsu.moe/wp-json/wp/v2/posts?per_page=100&page={}&modified_after={}&_fields=id,date,modified,link,title,content,categories"

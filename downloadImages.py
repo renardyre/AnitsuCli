@@ -9,7 +9,7 @@ import re
 def main():
 
   SCRIPT_PATH = os.path.dirname(__file__)
-  DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
+  DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
   T_COLUMNS = os.get_terminal_size().columns - 10
 
   with open(DB_PATH, 'r') as file:

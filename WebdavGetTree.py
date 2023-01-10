@@ -11,8 +11,8 @@ import os
 
 OCLOUD_URL = "https://www.odrive.com/rest/weblink/list_folder?weblinkUri=/{}"
 SCRIPT_PATH = os.path.dirname(__file__)
-DB_PATH = f"{SCRIPT_PATH}/Anitsu.json"
-TAGS_PATH = f"{SCRIPT_PATH}/Tags.json"
+DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
+TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
 CC_TASKS = 100
 T_COLUMNS = os.get_terminal_size().columns - 10
 START = monotonic()

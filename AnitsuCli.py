@@ -19,7 +19,8 @@ parser.add_argument('-o', '--one', action='store_true', help='Reproduz apenas um
 parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
 parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
 
-script_path = os.path.dirname(__file__)
+SCRIPT_PATH = os.path.dirname(__file__)
+DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 args = parser.parse_args()
 
 player = args.player
@@ -30,8 +31,8 @@ oneEpisode = args.one
 selectTags = args.tags
 update = args.update
 
-if update or not os.path.exists(f"{script_path}/Anitsu.json"):
-    commands = ['clear', 'tput civis', f'python3 {script_path}/PostsAnitsu.py', f'python3 {script_path}/WebdavGetTree.py', 'tput cnorm']
+if update or not os.path.exists(DB_PATH):
+    commands = ['clear', 'tput civis', f'python3 {SCRIPT_PATH}/PostsAnitsu.py', f'python3 {SCRIPT_PATH}/WebdavGetTree.py', 'tput cnorm']
     for c in commands:
         os.system(c)
     exit()
@@ -41,10 +42,10 @@ if returnLinks:
     ARIA_URL = os.getenv('ARIA_URL')
     ARIA_TOKEN = os.getenv('ARIA_TOKEN')
 
-fzf_args_img = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100% --preview-window="right,60%,border-left,wrap" --preview="' + script_path + '/fzf-img.py {}"'
+fzf_args_img = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100% --preview-window="right,60%,border-left,wrap" --preview="' + SCRIPT_PATH + '/fzf-img.py {}"'
 fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
 
-with open(f'{script_path}/Anitsu.json', 'r') as file:
+with open(DB_PATH, 'r') as file:
     database = json.load(file)
 
 fzf = FzfPrompt()
@@ -140,16 +141,16 @@ def watch(episodes):
         exit()
 
     if player == "syncplay":
-        with open(f'{script_path}/.playlist.txt', 'w') as pl:
+        with open(f'{SCRIPT_PATH}/.playlist.txt', 'w') as pl:
             pl.write("\n".join([ f'https://{i["Link"]}' for i in episodes ]))
-        os.system(f"syncplay --no-store --load-playlist-from-file '{script_path}/.playlist.txt'")
+        os.system(f"syncplay --no-store --load-playlist-from-file '{SCRIPT_PATH}/.playlist.txt'")
     else:
-        with open(f'{script_path}/.playlist.m3u', 'w') as pl:
+        with open(f'{SCRIPT_PATH}/.playlist.m3u', 'w') as pl:
             pl.write('#EXTM3U\n')
             for ep in episodes:
                 pl.write(f"#EXTINF:0, {ep['Title']}\nhttps://{ep['Link']}\n")
         if which("mpv"):
-            os.system(f"mpv --fs --playlist={script_path}/.playlist.m3u")
+            os.system(f"mpv --fs --playlist={SCRIPT_PATH}/.playlist.m3u")
         else:
             print("Mpv not installed, please install to reproduce the files!")
             exit()
@@ -163,7 +164,7 @@ def main():
         episodes = choose_eps(anime)
         if episodes:
             if not returnLinks and which("dunstify"):
-                os.system(f"dunstify 'AnitsuCli: Started playing' '{title}' -I {script_path}/Imgs/{image}.jpg")
+                os.system(f"dunstify 'AnitsuCli: Started playing' '{title}' -I {SCRIPT_PATH}/Imgs/{image}.jpg")
             watch(episodes)
 
 def clean_title(str: str):
