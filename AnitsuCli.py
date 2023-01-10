@@ -4,7 +4,6 @@ from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
 from shutil import which
 from time import sleep
-import subprocess as sp
 import pyperclip
 import requests
 import argparse

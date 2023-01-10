@@ -15,18 +15,17 @@ def main():
     index = choose[0]
     if index == "..": return
 
-    print('\n')
-    text = choose[1].replace('NeLi', '\n')
-    print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
-
     if which('feh'):
+        print('\n'*18)
         img = f'{SCRIPT_PATH}/Imgs/{index}.jpg'
         if os.path.exists(img): 
             sleep(0.3)
             copy(img, FZF_IMG)
-            sleep(0.3)
             os.system(f'touch {FZF_IMG}')
 
+    print('\n')
+    text = choose[1].replace('NeLi', '\n')
+    print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
 
 if __name__ == "__main__":
     main()
