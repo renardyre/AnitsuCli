@@ -7,7 +7,7 @@ import os
 import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
-FZF_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
+FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 
 def main():
     arg = sys.argv[1:]
@@ -19,7 +19,7 @@ def main():
         print('\n'*18)
         img = os.path.join(SCRIPT_PATH, 'Imgs', f'{index}.jpg')
         if os.path.exists(img): 
-            with open(FZF_IMG_LIST, 'w') as fp:
+            with open(FEH_IMG_LIST, 'w') as fp:
                 fp.write(img)
 
     print('\n')

@@ -4,9 +4,11 @@ from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
 from shutil import which
 from time import sleep
+import subprocess as sp
 import pyperclip
 import requests
 import argparse
+import signal
 import json
 import os
 import re
@@ -22,8 +24,8 @@ parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
-FZF_IMG = os.path.join(SCRIPT_PATH, ".fzf_img.jpg")
-FZF_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
+FEH_IMG = os.path.join(SCRIPT_PATH, ".fzf_img.jpg")
+FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 args = parser.parse_args()
 
 player = args.player
@@ -64,11 +66,11 @@ if selectTags:
 
 
 def start_feh():
-    os.system(f'convert xc:black -size 1x1 {FZF_IMG}')
-    with open(FZF_IMG_LIST, 'w') as fp:
-        fp.write(FZF_IMG)
-    os.system(f'feh -f {FZF_IMG_LIST} --scale-down --reload 0.1 --auto-zoom -q -x --image-bg black --class FloatingFeh >/dev/null 2>&1 &')
-
+    global FEH_PID
+    os.system(f'convert xc:black -size 1x1 {FEH_IMG}')
+    with open(FEH_IMG_LIST, 'w') as fp:
+        fp.write(FEH_IMG)
+        FEH_PID = sp.Popen(['feh', '-f', FEH_IMG_LIST, '--scale-down', '--reload', '0.1', '--auto-zoom', '-q', '-x', '--image-bg', 'black', '--class', 'FloatingFeh'], stdin=sp.PIPE, stdout=sp.PIPE,).pid
 
 def choose_anime():
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
@@ -89,7 +91,7 @@ def choose_anime():
             escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args)[0]
     finally:
         try:
-            os.system("pkill feh")
+            os.kill(FEH_PID, signal.SIGTERM)
         except:
             pass
         if escolha == '..\t..':
@@ -176,7 +178,7 @@ def main():
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
         if showImages:
-            os.system('pkill feh')
+            os.kill(FEH_PID, signal.SIGTERM)
         episodes = choose_eps(anime)
         if episodes:
             if not returnLinks and which("dunstify"):
