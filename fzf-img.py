@@ -17,10 +17,11 @@ def main():
 
     if which('feh'):
         print('\n'*18)
-        img = f'{SCRIPT_PATH}/Imgs/{index}.jpg'
+        img = os.path.join(SCRIPT_PATH, 'Imgs', f'{index}.jpg')
         if os.path.exists(img): 
             sleep(0.3)
             copy(img, FZF_IMG)
+            sleep(0.3)
             os.system(f'touch {FZF_IMG}')
 
     print('\n')
