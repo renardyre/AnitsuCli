@@ -20,7 +20,7 @@ def main():
     if index == "..": return
 
     print('\n')
-    text = choose[1].replace('NeLi', '\n')
+    text = choose[2].replace('NeLi', '\n')
     print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
 
     if feh:
