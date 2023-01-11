@@ -85,7 +85,7 @@ def choose_anime():
 
     try:
         if showImages:
-            start_feh()
+            if which('feh'): start_feh()
             escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args_img)[0]
         else:
             escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args)[0]
@@ -177,7 +177,7 @@ def main():
     while True:
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
-        if showImages:
+        if showImages and which('feh'):
             os.kill(FEH_PID, signal.SIGTERM)
         episodes = choose_eps(anime)
         if episodes:
