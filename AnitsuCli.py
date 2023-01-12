@@ -3,9 +3,12 @@
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
 from shutil import which
+from time import sleep
+import subprocess as sp
 import pyperclip
 import requests
 import argparse
+import signal
 import json
 import os
 import re
@@ -18,6 +21,8 @@ parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
+FEH_IMG = os.path.join(SCRIPT_PATH, ".fzf_img.jpg")
+FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 args = parser.parse_args()
 
 player = args.player
@@ -53,6 +58,14 @@ if selectTags:
     if '..' in tags: exit()
     tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
+
+def start_feh():
+    global FEH_PID
+    os.system(f'convert xc:black -size 1x1 {FEH_IMG}')
+    with open(FEH_IMG_LIST, 'w') as fp:
+        fp.write(FEH_IMG)
+        FEH_PID = sp.Popen(['feh', '-f', FEH_IMG_LIST, '--scale-down', '--reload', '0.1', '--auto-zoom', '-q', '-x', '--image-bg', 'black', '--class', 'FloatingFeh'], stdin=sp.PIPE, stdout=sp.PIPE,).pid
+
 def choose_anime():
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
     if selectTags: 
@@ -68,8 +81,11 @@ def choose_anime():
 
     escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
 
+    try:
+        os.kill(FEH_PID, signal.SIGTERM)
+    except:
+        pass
     if escolha == '..\t..':
-        os.system("pkill feh")
         exit(0)
 
     index = escolha.split('\t')[0]
@@ -139,6 +155,8 @@ def main():
     while True:
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
+        if showImages and which('feh'):
+            os.kill(FEH_PID, signal.SIGTERM)
         episodes = choose_eps(anime)
         if episodes:
             if not returnLinks and which("dunstify"):
