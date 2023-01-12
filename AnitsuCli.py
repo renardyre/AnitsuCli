@@ -155,8 +155,6 @@ def main():
     while True:
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
-        if showImages and which('feh'):
-            os.kill(FEH_PID, signal.SIGTERM)
         episodes = choose_eps(anime)
         if episodes:
             if not returnLinks and which("dunstify"):
