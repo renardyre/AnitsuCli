@@ -15,7 +15,7 @@ import re
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
-LAST_RUN =  os.path.join(SCRIPT_PATH, "LastRun.txt")
+LAST_RUN =  os.path.join(SCRIPT_PATH, ".last_run")
 NOW = datetime.isoformat(datetime.now())
 START = monotonic()
 WP_URL = "https://anitsu.moe/wp-json/wp/v2/posts?per_page=100&page={}&modified_after={}&_fields=id,date,modified,link,title,content,categories"
@@ -23,6 +23,7 @@ CC_TASKS = 10
 T_COLUMNS = os.get_terminal_size().columns - 10
 R_NEXTCLOUD = re.compile(r'https?:\/\/(.*?\/nextcloud\/s\/[^\"]{15})')
 R_OCLOUD = re.compile(r'https?:\/\/(www\.odrive\.com\/s\/[^\"]*)')
+R_GDR  = re.compile(r'href=\"https\:\/\/(drive\.google[^\"]*)')
 R_MAL = re.compile(r'https?:\/\/myanimelist\.net\/anime\/(\d*)?\/[^\\]+')
 R_ANILIST = re.compile(r'https?:\/\/anilist\.co\/anime\/(\d*)?\/[^\\]+')
 R_IMG = re.compile(r'(https?:\/\/.*?\/.*?\.(?:png|jpe?g|webp|gif))')
@@ -119,7 +120,8 @@ async def update_db(posts: dict):
         content = post['content']['rendered']
         links = re.findall(R_NEXTCLOUD, content)
         odrive_links = re.findall(R_OCLOUD, content)
-        if not links and not odrive_links: continue
+        gd_links = re.findall(R_GDR, content)
+        if not links and not odrive_links and not gd_links: continue
         notifications.append(post['id'])
         db[post['id']] = {
             'Title': html.unescape(post['title']['rendered']),
@@ -133,6 +135,7 @@ async def update_db(posts: dict):
             'Link': post['link'],
             'Download': links,
             'ODrive': odrive_links,
+            'GDrive': gd_links,
             'Tags': [ tags[str(i)] for i in post['categories']]
         }
 

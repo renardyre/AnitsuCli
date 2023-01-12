@@ -4,4 +4,7 @@ Imgs/*
 Anitsu.json
 .playlist*
 .env
-LastRun.txt
+.fzf_img.jpg
+.img_list
+.last_run
+venv
