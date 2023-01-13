@@ -39,7 +39,10 @@ async def main():
     passwd = os.getenv("ANITSU_PASSWD")
     auth = aiohttp.BasicAuth(username, passwd)
 
-    if os.path.exists(LAST_RUN):
+    if os.path.exists(DB_PATH) and os.path.exists(LAST_RUN):
+        with open(DB_PATH, 'r') as fp:
+            db = json.load(fp)
+
         with open(LAST_RUN, 'r+') as fp:
             last_run = fp.read()
             fp.seek(0)
@@ -52,10 +55,6 @@ async def main():
 
     with open(TAGS_PATH, 'r') as fp:
         tags = json.load(fp)
-
-    if os.path.exists(DB_PATH):
-        with open(DB_PATH, 'r') as fp:
-            db = json.load(fp)
 
     counter = 0
     async with aiohttp.ClientSession() as session:

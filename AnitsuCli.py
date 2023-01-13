@@ -146,6 +146,7 @@ if __name__ == "__main__":
     
     if not which('fzf'):
         print("Fzf not installed, please install to navigate!")
+        exit()
     
     if returnLinks:
         load_dotenv()
