@@ -152,6 +152,7 @@ if __name__ == "__main__":
         load_dotenv()
         ARIA_URL = os.getenv('ARIA_URL')
         ARIA_TOKEN = os.getenv('ARIA_TOKEN')
+        ARIA_DIR = os.getenv('ARIA_DIR')
     
     bindings = [
             f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
