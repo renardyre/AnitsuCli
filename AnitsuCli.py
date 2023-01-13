@@ -137,6 +137,12 @@ if __name__ == "__main__":
     returnLinks = args.links
     selectTags = args.tags
     update = args.update
+
+    if update or not os.path.exists(DB_PATH):
+        clear_terminal()
+        asyncio.run(PostsAnitsu.main())
+        asyncio.run(WebdavGetTree.main())
+        exit()
     
     if not which('fzf'):
         print("Fzf not installed, please install to navigate!")
@@ -168,9 +174,4 @@ if __name__ == "__main__":
         if '..' in tags: exit()
         tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
-    if update or not os.path.exists(DB_PATH):
-        clear_terminal()
-        asyncio.run(PostsAnitsu.main())
-        asyncio.run(WebdavGetTree.main())
-        exit()
     main()
