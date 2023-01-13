@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 from shutil import which
 from time import sleep
 import subprocess as sp
+import HandleFeh
 import pyperclip
 import requests
 import argparse
-import signal
 import json
 import os
 import re
@@ -21,8 +21,6 @@ parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
-FEH_IMG = os.path.join(SCRIPT_PATH, ".fzf_img.jpg")
-FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 args = parser.parse_args()
 
 player = args.player
@@ -41,7 +39,12 @@ if returnLinks:
     ARIA_URL = os.getenv('ARIA_URL')
     ARIA_TOKEN = os.getenv('ARIA_TOKEN')
 
-fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="{SCRIPT_PATH}/preview-img.py {{}}" --bind="start:toggle-preview,ctrl-p:toggle-preview+execute-silent(pkill feh),ctrl-f:execute-silent(pkill feh)+change-preview({SCRIPT_PATH}/preview-files.py {{2}}),ctrl-i:change-preview({SCRIPT_PATH}/preview-img.py {{}}),ctrl-w:toggle-preview-wrap"'
+bindings = [
+        f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
+        f"ctrl-f:execute-silent({SCRIPT_PATH}/HandleFeh.py stop)+change-preview({SCRIPT_PATH}/preview-files.py {{2}})",
+        "ctrl-w:toggle-preview-wrap"]
+
+fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="" --bind="{",".join(bindings)}"'
 fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
 
 with open(DB_PATH, 'r') as file:
@@ -58,14 +61,6 @@ if selectTags:
     if '..' in tags: exit()
     tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
-
-def start_feh():
-    global FEH_PID
-    os.system(f'convert xc:black -size 1x1 {FEH_IMG}')
-    with open(FEH_IMG_LIST, 'w') as fp:
-        fp.write(FEH_IMG)
-        FEH_PID = sp.Popen(['feh', '-f', FEH_IMG_LIST, '--scale-down', '--reload', '0.1', '--auto-zoom', '-q', '-x', '--image-bg', 'black', '--class', 'FloatingFeh'], stdin=sp.PIPE, stdout=sp.PIPE,).pid
-
 def choose_anime():
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
     if selectTags: 
@@ -81,10 +76,9 @@ def choose_anime():
 
     escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
 
-    try:
-        os.kill(FEH_PID, signal.SIGTERM)
-    except:
-        pass
+    if which('feh'):
+        HandleFeh.stop_feh()
+
     if escolha == '..\t..':
         exit(0)
 
@@ -102,7 +96,7 @@ def choose_eps(anime):
         dirs = [ f" {dir}" for dir in file_tree['Dirs'].keys() ]
         files = [ file['Title'] for file in file_tree['Files'] ]
 
-        choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first,start:execute-silent(pkill feh)'")
+        choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
 
         if choose[0] in dirs:
             previous.append(file_tree.copy())
