@@ -16,52 +16,6 @@ import json
 import os
 import re
 
-parser = argparse.ArgumentParser(description="Lista e reproduz animes disponíveis na Anitsu", add_help=False)
-parser.add_argument('-p', '--player', default='mpv', type=str, choices=['mpv', 'syncplay'], help='Seleciona o player a ser utilizado. Padrão: mpv')
-parser.add_argument('-l', '--links', action='store_true', help='Em vez de reproduzir, retorna os links dos arquivos selecionados')
-parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
-parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
-parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.0)', help="Mostra a versão do programa")
-parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Mostra esta mensagem de ajuda')
-
-SCRIPT_PATH = os.path.dirname(__file__)
-DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
-args = parser.parse_args()
-
-player = args.player
-returnLinks = args.links
-selectTags = args.tags
-update = args.update
-
-if not which('fzf'):
-    print("Fzf not installed, please install to navigate!")
-
-if returnLinks:
-    load_dotenv()
-    ARIA_URL = os.getenv('ARIA_URL')
-    ARIA_TOKEN = os.getenv('ARIA_TOKEN')
-
-bindings = [
-        f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
-        f"ctrl-f:execute-silent({SCRIPT_PATH}/HandleFeh.py stop)+change-preview({SCRIPT_PATH}/preview-files.py {{2}})",
-        "ctrl-w:toggle-preview-wrap"]
-
-fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="" --bind="{",".join(bindings)}"'
-fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
-
-with open(DB_PATH, 'r') as file:
-    database = json.load(file)
-
-fzf = FzfPrompt()
-
-if selectTags:
-    allTags = [ j for i in database.values() if "Tags" in i.keys() for j in i["Tags"]]
-    uniqueTags = list(set(sorted(allTags)))
-    uniqueTags.sort()
-    uniqueTags = [f"{i} ({allTags.count(i)})" for i in uniqueTags]
-    tags = fzf.prompt(uniqueTags+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
-    if '..' in tags: exit()
-    tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
 def choose_anime():
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
@@ -167,6 +121,53 @@ def clear_terminal():
         os.system('clear')
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Lista e reproduz animes disponíveis na Anitsu", add_help=False)
+    parser.add_argument('-p', '--player', default='mpv', type=str, choices=['mpv', 'syncplay'], help='Seleciona o player a ser utilizado. Padrão: mpv')
+    parser.add_argument('-l', '--links', action='store_true', help='Em vez de reproduzir, retorna os links dos arquivos selecionados')
+    parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
+    parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
+    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.0)', help="Mostra a versão do programa")
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Mostra esta mensagem de ajuda')
+    
+    SCRIPT_PATH = os.path.dirname(__file__)
+    DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
+    args = parser.parse_args()
+    
+    player = args.player
+    returnLinks = args.links
+    selectTags = args.tags
+    update = args.update
+    
+    if not which('fzf'):
+        print("Fzf not installed, please install to navigate!")
+    
+    if returnLinks:
+        load_dotenv()
+        ARIA_URL = os.getenv('ARIA_URL')
+        ARIA_TOKEN = os.getenv('ARIA_TOKEN')
+    
+    bindings = [
+            f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
+            f"ctrl-f:execute-silent({SCRIPT_PATH}/HandleFeh.py stop)+change-preview({SCRIPT_PATH}/preview-files.py {{2}})",
+            "ctrl-w:toggle-preview-wrap"]
+    
+    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="" --bind="{",".join(bindings)}"'
+    fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
+    
+    with open(DB_PATH, 'r') as file:
+        database = json.load(file)
+    
+    fzf = FzfPrompt()
+    
+    if selectTags:
+        allTags = [ j for i in database.values() if "Tags" in i.keys() for j in i["Tags"]]
+        uniqueTags = list(set(sorted(allTags)))
+        uniqueTags.sort()
+        uniqueTags = [f"{i} ({allTags.count(i)})" for i in uniqueTags]
+        tags = fzf.prompt(uniqueTags+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
+        if '..' in tags: exit()
+        tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
+
     if update or not os.path.exists(DB_PATH):
         clear_terminal()
         asyncio.run(PostsAnitsu.main())
