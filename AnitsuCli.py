@@ -36,12 +36,6 @@ update = args.update
 if not which('fzf'):
     print("Fzf not installed, please install to navigate!")
 
-if update or not os.path.exists(DB_PATH):
-    clear_terminal()
-    asyncio.run(PostsAnitsu.main())
-    asyncio.run(WebdavGetTree.main())
-    exit()
-
 if returnLinks:
     load_dotenv()
     ARIA_URL = os.getenv('ARIA_URL')
@@ -173,4 +167,9 @@ def clear_terminal():
         os.system('clear')
 
 if __name__ == "__main__":
+    if update or not os.path.exists(DB_PATH):
+        clear_terminal()
+        asyncio.run(PostsAnitsu.main())
+        asyncio.run(WebdavGetTree.main())
+        exit()
     main()
