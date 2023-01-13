@@ -11,9 +11,10 @@
 *Optional
 
 ## Setup
+#### For Windows Users
+> It's required to have [fzf](https://github.com/junegunn/fzf/releases) and [mpv](https://mpv.io/installation/) installed. You can put theirs binaries inside AnitsuCli folder if you don't want to install them.
 
-### Create .env file
-
+### Create .env File
 ```env
 ANITSU_USERNAME=""
 ANITSU_PASSWD=""
@@ -22,13 +23,12 @@ ARIA_TOKEN=""   #Optional
 ```
 
 ### Install Requirements and Run
-
 ```bash
 git clone https://github.com/renardyre/AnitsuCli
 cd AnitsuCli
 pip install -r requirements.txt
 chmod +x *py
-./AnitsuCli.py
+./AnitsuCli.py -h
 ```
 
 ![preview](preview.gif)
