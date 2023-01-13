@@ -5,10 +5,13 @@ from dotenv import load_dotenv
 from shutil import which
 from time import sleep
 import subprocess as sp
+import WebdavGetTree
+import PostsAnitsu
 import HandleFeh
 import pyperclip
 import requests
 import argparse
+import asyncio
 import json
 import os
 import re
@@ -28,10 +31,13 @@ returnLinks = args.links
 selectTags = args.tags
 update = args.update
 
+if not which('fzf'):
+    print("Fzf not installed, please install to navigate!")
+
 if update or not os.path.exists(DB_PATH):
-    commands = ['clear', 'tput civis', f'python3 {SCRIPT_PATH}/PostsAnitsu.py', f'python3 {SCRIPT_PATH}/WebdavGetTree.py', 'tput cnorm']
-    for c in commands:
-        os.system(c)
+    clear_terminal()
+    asyncio.run(PostsAnitsu.main())
+    asyncio.run(WebdavGetTree.main())
     exit()
 
 if returnLinks:
@@ -57,7 +63,7 @@ if selectTags:
     uniqueTags = list(set(sorted(allTags)))
     uniqueTags.sort()
     uniqueTags = [f"{i} ({allTags.count(i)})" for i in uniqueTags]
-    tags = fzf.prompt(uniqueTags+['..'], fzf_args + " -m")
+    tags = fzf.prompt(uniqueTags+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
     if '..' in tags: exit()
     tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
@@ -72,7 +78,7 @@ def choose_anime():
                 f"{str(i)}\t{{'Dirs': {list(database[str(i)]['Tree']['Dirs'].keys())}, 'Files': {list(database[str(i)]['Tree']['Files'])}}}\t{database[str(i)]['Description']}\t{clean_title(database[str(i)]['Title'])}" for i in keys
         ]
     
-    os.system('clear')
+    clear_terminal()
 
     escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
 
@@ -157,6 +163,12 @@ def main():
 
 def clean_title(str: str):
     return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
+
+def clear_terminal():
+    if os.name == "nt":
+        os.system('cls')
+    else:
+        os.system('clear')
 
 if __name__ == "__main__":
     main()
