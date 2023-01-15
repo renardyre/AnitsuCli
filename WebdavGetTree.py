@@ -10,7 +10,7 @@ import re
 import os
 
 OCLOUD_URL = "https://www.odrive.com/rest/weblink/list_folder?weblinkUri=/{}"
-GDRIVE_URL = "https://drive.google.com/u/0/uc?id={}&export=download"
+GDRIVE_URL = "drive.google.com/u/0/uc?id={}&export=download&confirm=t"
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
@@ -67,8 +67,9 @@ async def run(queue: asyncio.Queue):
         elif 'drive.google.com/drive/folders' in link:
             try:
                 await gdrive(link, index)
-            except:
+            except Exception as e:
                 print(link)
+                print(e)
         elif 'drive.google.com/file' in link:
             pass
         else:
@@ -79,24 +80,29 @@ async def run(queue: asyncio.Queue):
         pbar(counter, total_links, title)
         queue.task_done()
 
-async def gdrive(link, index):
+async def gdrive(link:str, index:str):
     id = link.split('/')[-1]
-    files = os.popen(f"rclone lsjson --files-only --no-modtime --no-mimetype -R --drive-root-folder-id '{id}' Anitsu:").read()
-    files = json.loads(files)
+    proc = await asyncio.create_subprocess_shell(" ".join([
+            'rclone', 'lsjson', '-R', '--files-only',
+            '--no-modtime', '--no-mimetype',
+            '--drive-root-folder-id', id, 'Anitsu:'
+        ]), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await proc.communicate()
+    files = json.loads(stdout.decode())
     for f in files:
         path = f["Path"].split('/')
         size = f["Size"]
         id = f["ID"]
+        temp = db[index]['Tree']['Dirs']['Google Drive']
         if len(path) > 1:
-            temp = db[index]['Tree']['Dirs']['Google Drive']['Dirs']
             for p in path[:-1]:
-                temp = temp[p]
+                temp = temp['Dirs'][p]
             temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
         else:
-            temp = db[index]['Tree']['Dirs']['Google Drive']['Files']
+            temp = temp['Files']
             temp.append({"Title": path[0], "Link": GDRIVE_URL.format(id)})
 
-async def odrive(link, index):
+async def odrive(link:str, index:str):
     id = link.split('/')[-1]
     async with session.get(OCLOUD_URL.format(id)) as r:
         files = await r.json()
@@ -109,7 +115,7 @@ async def odrive(link, index):
             download_url = ''
         temp.append({"Title": value['name'], "Link": download_url})
     
-async def nextcloud(first, link, index, title, passwd):
+async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
     link = link.replace('anitsu.com.br', 'anitsu.moe')
     id = link.split('/')[-1]
     url = f'https://{link.split("/")[0]}/nextcloud/public.php/webdav'
