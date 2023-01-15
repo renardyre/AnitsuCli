@@ -10,6 +10,7 @@ import re
 import os
 
 OCLOUD_URL = "https://www.odrive.com/rest/weblink/list_folder?weblinkUri=/{}"
+GDRIVE_URL = "https://drive.google.com/u/0/uc?id={}&export=download"
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
@@ -23,7 +24,7 @@ async def main():
     with open(DB_PATH, 'r') as file:
         db = json.load(file)
 
-    total_links = len([ j for i in db.values() for j in i['Download'] + i['ODrive'] if 'Tree' not in i.keys()])
+    total_links = len([ j for i in db.values() for j in i['Download'] + i['ODrive'] + i['GDrive'] if 'Tree' not in i.keys()])
     print(f"\n{total_links} Folders to scan!\n")
   
     if total_links == 0: return
@@ -36,7 +37,7 @@ async def main():
 
             db[index]['Tree'] = molde()
       
-            for i, link in enumerate(value["Download"] + value['ODrive']):
+            for i, link in enumerate(value["Download"] + value['ODrive'] + value['GDrive']):
                 if i == 0:
                     queue.put_nowait((True, link, index, value['Title'], value['Password']))
                 else:
@@ -63,6 +64,13 @@ async def run(queue: asyncio.Queue):
         if 'odrive' in link:
             pass
             #await odrive(link, index)
+        elif 'drive.google.com/drive/folders' in link:
+            try:
+                await gdrive(link, index)
+            except:
+                print(link)
+        elif 'drive.google.com/file' in link:
+            pass
         else:
             await nextcloud(first, link, index, title, passwd)
 
@@ -70,6 +78,23 @@ async def run(queue: asyncio.Queue):
         counter += 1
         pbar(counter, total_links, title)
         queue.task_done()
+
+async def gdrive(link, index):
+    id = link.split('/')[-1]
+    files = os.popen(f"rclone lsjson --files-only --no-modtime --no-mimetype -R --drive-root-folder-id '{id}' Anitsu:").read()
+    files = json.loads(files)
+    for f in files:
+        path = f["Path"].split('/')
+        size = f["Size"]
+        id = f["ID"]
+        if len(path) > 1:
+            temp = db[index]['Tree']['Dirs']['Google Drive']['Dirs']
+            for p in path[:-1]:
+                temp = temp[p]
+            temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
+        else:
+            temp = db[index]['Tree']['Dirs']['Google Drive']['Files']
+            temp.append({"Title": path[0], "Link": GDRIVE_URL.format(id)})
 
 async def odrive(link, index):
     id = link.split('/')[-1]
