@@ -72,7 +72,7 @@ async def run(queue: asyncio.Queue):
                 await gdrive(link, index)
             elif 'drive.google.com/file' in link:
                 pass
-            elif 'anitsu.cloud' in link:
+            elif 'cloud.anitsu' in link:
                 await nextcloud(first, link, index, title, passwd)
         except Exception as e:
             print(f"{link} - {e}")
@@ -121,7 +121,9 @@ async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
     auth = aiohttp.BasicAuth(id, passwd)
 
     async with session.request(method="PROPFIND", url=url, headers=headers, auth=auth) as r:
-        if r.status != 207: print('\n' + title + '\n')
+        if r.status != 207:
+            print('\n' + title + '\n')
+            return
         text = await r.text()
 
     files = [ unquote(i) for i in re.findall(r'public.php\/webdav/([^<]+?)</d', text)]
