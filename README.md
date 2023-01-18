@@ -5,6 +5,7 @@
 - [fzf](https://github.com/junegunn/fzf)
 - [mpv](https://github.com/mpv-player/mpv)
 - [feh](https://github.com/derf/feh)*
+- [rclone](https://rclone.org)*
 - [aria2](https://github.com/aria2/aria2)*
 - [imagemagick](https://github.com/ImageMagick/ImageMagick)*
 
@@ -13,6 +14,9 @@
 ## Setup
 #### For Windows Users
 > It's required to have [fzf](https://github.com/junegunn/fzf/releases) and [mpv](https://mpv.io/installation/) installed. You can put theirs binaries inside AnitsuCli folder if you don't want to install them.
+
+### Google Drive Support
+> To have support to GD, you'll have to create a remote called `Anitsu:`. Follow instructions [here](https://rclone.org/drive/).
 
 ### Create .env File
 ```env
