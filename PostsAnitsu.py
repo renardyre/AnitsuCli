@@ -23,7 +23,7 @@ CC_TASKS = 10
 T_COLUMNS = os.get_terminal_size().columns - 10
 R_NEXTCLOUD = re.compile(r'https?:\/\/(.*?\/nextcloud\/s\/[^\"]{15})')
 R_OCLOUD = re.compile(r'https?:\/\/(www\.odrive\.com\/s\/[^\"]*)')
-R_GDR  = re.compile(r'href=\"https\:\/\/(drive\.google[^\"]*)')
+R_GDR  = re.compile(r'href=\"https\:\/\/(drive\.google[^\"\?]*)')
 R_MAL = re.compile(r'https?:\/\/myanimelist\.net\/anime\/(\d*)?\/[^\\]+')
 R_ANILIST = re.compile(r'https?:\/\/anilist\.co\/anime\/(\d*)?\/[^\\]+')
 R_IMG = re.compile(r'(https?:\/\/.*?\/.*?\.(?:png|jpe?g|webp|gif))')

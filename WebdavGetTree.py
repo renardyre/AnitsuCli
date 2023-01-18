@@ -3,6 +3,7 @@
 from urllib.request import quote, unquote
 from collections import defaultdict
 from time import monotonic
+from shutil import which
 import aiohttp
 import asyncio
 import json
@@ -10,6 +11,7 @@ import re
 import os
 
 OCLOUD_URL = "https://www.odrive.com/rest/weblink/list_folder?weblinkUri=/{}"
+GDRIVE_URL = "drive.google.com/u/0/uc?id={}&export=download&confirm=t"
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
@@ -18,12 +20,14 @@ T_COLUMNS = os.get_terminal_size().columns - 10
 START = monotonic()
 
 async def main():
-    global db, total_links, session, counter
+    global db, total_links, session, counter, rclone
+
+    rclone = which('rclone')
 
     with open(DB_PATH, 'r') as file:
         db = json.load(file)
 
-    total_links = len([ j for i in db.values() for j in i['Download'] + i['ODrive'] if 'Tree' not in i.keys()])
+    total_links = len([ j for i in db.values() for j in i['Download'] + i['ODrive'] + i['GDrive'] if 'Tree' not in i.keys()])
     print(f"\n{total_links} Folders to scan!\n")
   
     if total_links == 0: return
@@ -36,7 +40,7 @@ async def main():
 
             db[index]['Tree'] = molde()
       
-            for i, link in enumerate(value["Download"] + value['ODrive']):
+            for i, link in enumerate(value["Download"] + value['ODrive'] + value['GDrive']):
                 if i == 0:
                     queue.put_nowait((True, link, index, value['Title'], value['Password']))
                 else:
@@ -60,18 +64,43 @@ async def main():
 async def run(queue: asyncio.Queue):
     while True:
         first, link, index, title, passwd = await queue.get()
-        if 'odrive' in link:
-            pass
-            #await odrive(link, index)
-        else:
-            await nextcloud(first, link, index, title, passwd)
+        try:
+            if 'odrive' in link:
+                pass
+                #await odrive(link, index)
+            elif 'drive.google.com/drive/folders' in link and rclone:
+                await gdrive(link, index)
+            elif 'drive.google.com/file' in link:
+                pass
+            elif 'cloud.anitsu' in link:
+                await nextcloud(first, link, index, title, passwd)
+        except Exception as e:
+            print(f"{link} - {e}")
 
         global counter
         counter += 1
         pbar(counter, total_links, title)
         queue.task_done()
 
-async def odrive(link, index):
+async def gdrive(link:str, index:str):
+    id = link.split('/')[-1]
+    proc = await asyncio.create_subprocess_shell(" ".join([
+            'rclone', 'lsjson', '-R', '--files-only',
+            '--no-modtime', '--no-mimetype',
+            '--drive-root-folder-id', id, 'Anitsu:'
+        ]), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await proc.communicate()
+    files = json.loads(stdout.decode())
+    for f in files:
+        path = f["Path"].split('/')
+        size = f["Size"]
+        id = f["ID"]
+        temp = db[index]['Tree']['Dirs']['Google Drive']
+        for p in path[:-1]:
+            temp = temp['Dirs'][p]
+        temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
+
+async def odrive(link:str, index:str):
     id = link.split('/')[-1]
     async with session.get(OCLOUD_URL.format(id)) as r:
         files = await r.json()
@@ -84,7 +113,7 @@ async def odrive(link, index):
             download_url = ''
         temp.append({"Title": value['name'], "Link": download_url})
     
-async def nextcloud(first, link, index, title, passwd):
+async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
     link = link.replace('anitsu.com.br', 'anitsu.moe')
     id = link.split('/')[-1]
     url = f'https://{link.split("/")[0]}/nextcloud/public.php/webdav'
@@ -92,7 +121,9 @@ async def nextcloud(first, link, index, title, passwd):
     auth = aiohttp.BasicAuth(id, passwd)
 
     async with session.request(method="PROPFIND", url=url, headers=headers, auth=auth) as r:
-        if r.status != 207: print('\n' + title + '\n')
+        if r.status != 207:
+            print('\n' + title + '\n')
+            return
         text = await r.text()
 
     files = [ unquote(i) for i in re.findall(r'public.php\/webdav/([^<]+?)</d', text)]
