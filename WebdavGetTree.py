@@ -5,6 +5,7 @@ from collections import defaultdict
 from time import monotonic
 import aiohttp
 import asyncio
+from shutil import which
 import json
 import re
 import os
@@ -19,7 +20,9 @@ T_COLUMNS = os.get_terminal_size().columns - 10
 START = monotonic()
 
 async def main():
-    global db, total_links, session, counter
+    global db, total_links, session, counter, rclone
+
+    rclone = which('rclone')
 
     with open(DB_PATH, 'r') as file:
         db = json.load(file)
@@ -61,19 +64,18 @@ async def main():
 async def run(queue: asyncio.Queue):
     while True:
         first, link, index, title, passwd = await queue.get()
-        if 'odrive' in link:
-            pass
-            #await odrive(link, index)
-        elif 'drive.google.com/drive/folders' in link:
-            try:
+        try:
+            if 'odrive' in link:
+                pass
+                #await odrive(link, index)
+            elif 'drive.google.com/drive/folders' in link and rclone:
                 await gdrive(link, index)
-            except Exception as e:
-                print(link)
-                print(e)
-        elif 'drive.google.com/file' in link:
-            pass
-        else:
-            await nextcloud(first, link, index, title, passwd)
+            elif 'drive.google.com/file' in link:
+                pass
+            elif 'anitsu.cloud' in link:
+                await nextcloud(first, link, index, title, passwd)
+        except Exception as e:
+            print(f"{link} - {e}")
 
         global counter
         counter += 1
