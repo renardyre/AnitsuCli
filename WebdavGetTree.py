@@ -96,13 +96,9 @@ async def gdrive(link:str, index:str):
         size = f["Size"]
         id = f["ID"]
         temp = db[index]['Tree']['Dirs']['Google Drive']
-        if len(path) > 1:
-            for p in path[:-1]:
-                temp = temp['Dirs'][p]
-            temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
-        else:
-            temp = temp['Files']
-            temp.append({"Title": path[0], "Link": GDRIVE_URL.format(id)})
+        for p in path[:-1]:
+            temp = temp['Dirs'][p]
+        temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
 
 async def odrive(link:str, index:str):
     id = link.split('/')[-1]
