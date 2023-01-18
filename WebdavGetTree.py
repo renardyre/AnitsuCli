@@ -3,9 +3,9 @@
 from urllib.request import quote, unquote
 from collections import defaultdict
 from time import monotonic
+from shutil import which
 import aiohttp
 import asyncio
-from shutil import which
 import json
 import re
 import os
