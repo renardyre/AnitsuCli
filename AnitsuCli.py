@@ -126,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--links', action='store_true', help='Em vez de reproduzir, retorna os links dos arquivos selecionados')
     parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
     parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
-    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.0)', help="Mostra a versão do programa")
+    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.2)', help="Mostra a versão do programa")
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Mostra esta mensagem de ajuda')
     
     SCRIPT_PATH = os.path.dirname(__file__)
