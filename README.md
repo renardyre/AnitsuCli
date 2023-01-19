@@ -43,7 +43,7 @@ ARIA_TOKEN=""       #Opcional (Download automático pelo aria2)
 2. Entre na pasta do projeto com `cd AnitsuCli`
 3. Rode o comando `pip install -r requirements.txt` para instalar as dependências do projeto.
 4. Altere as permissões dos arquivos .py com `chmod +x *.py`
-5. Rode o programa usando `python AnitsuCli.py -h para ver as opções de comando.`
+5. Rode o programa usando `python AnitsuCli.py -h` para ver as opções de comando.
 
 ## Flags e Bindings
 ```
