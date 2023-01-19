@@ -1,7 +1,7 @@
 # AnitsuCli
 ![Cover](https://cdn.discordapp.com/attachments/1028636320190443570/1028636414025420872/unknown.png)
 
-### Third-Party Dependencies
+## Dependências
 - [fzf](https://github.com/junegunn/fzf)
 - [mpv](https://github.com/mpv-player/mpv)
 - [feh](https://github.com/derf/feh)*
@@ -9,24 +9,41 @@
 - [aria2](https://github.com/aria2/aria2)*
 - [imagemagick](https://github.com/ImageMagick/ImageMagick)*
 
-*Optional
+*Opcional
 
-## Setup
-#### For Windows Users
-> It's required to have [fzf](https://github.com/junegunn/fzf/releases) and [mpv](https://mpv.io/installation/) installed. You can put theirs binaries inside AnitsuCli folder if you don't want to install them.
 
-### Google Drive Support
-> To have support to GD, you'll have to create a remote called `Anitsu:`. Follow instructions [here](https://rclone.org/drive/).
+## Funcionalidades
+```
+Flags:
+-l, --links    Em vez de reproduzir, copia os links de download (Se configurado, inicia o download no aria).
+-t, --tags     Seleciona tags.
+-u, --update   Atualiza a base de dados.
+-v, --version  Mostra a versão do programa.
+-h, --help     Mostra a mensagem de ajuda.
 
-### Create .env File
-```env
-ANITSU_USERNAME=""
-ANITSU_PASSWD=""
-ARIA_URL=""     #Optional 
-ARIA_TOKEN=""   #Optional
+Bindings:
+ctrl-p         Ativa preview de info e imagem do post, se disponível.
+ctrl-f         Ativa preview de arquivos do post, se disponível.
+ctrl-w         Ativa ou desativa a quebra de linha automática do preview.
+ctrl-a         Seleciona todos os arquivos mostrados.
 ```
 
-### Install Requirements and Run
+## Setup
+#### Usuários de Windows
+> É necessário ter [fzf](https://github.com/junegunn/fzf/releases) e [mpv](https://mpv.io/installation/) instalado. Você pode instalar os programas, ou baixar os binários e colocá-los dentro da pasta AnitsuCli.
+
+#### Suporte para Google Drive
+> Para ter suporte, você terá que criar um remote no rclone chamado: `Anitsu`. Siga instruções [aqui](https://rclone.org/drive/).
+
+#### Crie o arquivo `.env`
+```env
+ANITSU_USERNAME=""  #Seu usuário na Anitsu
+ANITSU_PASSWD=""    #Sua Senha na Anitsu
+ARIA_URL=""         #Opcional
+ARIA_TOKEN=""       #Opcional
+```
+
+#### Instale os requisitos e rode o programa
 ```bash
 git clone https://github.com/renardyre/AnitsuCli
 cd AnitsuCli
