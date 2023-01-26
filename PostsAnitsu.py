@@ -2,9 +2,11 @@
 
 from shutil import which
 from time import monotonic, sleep
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 from datetime import datetime
+from getpass import getpass
 import downloadImages
+import requests
 import aiohttp
 import asyncio
 import json
@@ -34,10 +36,9 @@ async def main():
     db = {}
     notifications = []
 
-    load_dotenv()
-    username = os.getenv("ANITSU_USERNAME")
-    passwd = os.getenv("ANITSU_PASSWD")
-    auth = aiohttp.BasicAuth(username, passwd)
+    user, passwd = get_credentials()
+    clear_terminal()
+    auth = aiohttp.BasicAuth(user, passwd)
 
     if os.path.exists(DB_PATH) and os.path.exists(LAST_RUN):
         with open(DB_PATH, 'r') as fp:
@@ -163,6 +164,38 @@ def description(text: str):
 
 def clean_title(str: str):
   return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
+
+def clear_terminal():
+    if os.name == "nt":
+        os.system('cls')
+    else:
+        os.system('clear')
+
+def input_credentials():
+    print("Por favor insira seus dados de login!")
+    username = input("Usuário: ")
+    passwd = getpass("Senha: ")
+    return username, passwd
+
+def set_credentials(username, passwd):
+    set_key('.env', 'ANITSU_USERNAME', username)
+    set_key('.env', 'ANITSU_PASSWD', passwd)
+
+def get_credentials():
+    load_dotenv()
+    username = os.getenv("ANITSU_USERNAME")
+    passwd = os.getenv("ANITSU_PASSWD")
+    logged = False
+    test_url = "https://anitsu.moe/wp-json/wp/v2/users/1?_fields=id"
+    while not logged:
+        if not username or not passwd:
+            username, passwd = input_credentials()
+        logged = requests.get(test_url, auth=(username, passwd)).status_code == 200
+        if not logged:
+            clear_terminal()
+            print("Usuário e/ou senha inválidos!")
+    set_credentials(username, passwd)
+    return (username, passwd)
 
 if __name__ == "__main__":
     asyncio.run(main())
