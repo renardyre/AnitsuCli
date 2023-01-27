@@ -194,6 +194,7 @@ def get_credentials():
         if not logged:
             clear_terminal()
             print("Usuário e/ou senha inválidos!")
+            username, passwd = '', ''
     set_credentials(username, passwd)
     return (username, passwd)
 
