@@ -16,6 +16,7 @@ def start_feh():
         pid = fp.read() 
     if pid != "stopped":
         return
+    return
 
     os.system(f'convert xc:black -size 1x1 {FEH_IMG}')
     with open(FEH_IMG_LIST, 'w') as fp:
