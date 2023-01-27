@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from threading import Thread
+import preview_ueberzug
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
 from shutil import which
@@ -34,6 +36,8 @@ def choose_anime():
 
     if which('feh'):
         HandleFeh.stop_feh()
+        with open(os.path.join(SCRIPT_PATH, '.img_list'), 'w') as fp:
+            fp.write('kill')
 
     if escolha == '..\t..':
         exit(0)
@@ -110,6 +114,9 @@ def watch(episodes, path):
 
 def main():
     while True:
+        HandleFeh.start_feh()
+        t = Thread(target=preview_ueberzug.main)
+        t.start()
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
         episodes, path = choose_eps(anime)
@@ -150,7 +157,7 @@ if __name__ == "__main__":
         asyncio.run(PostsAnitsu.main())
         asyncio.run(WebdavGetTree.main())
         exit()
-    
+   
     if not which('fzf'):
         print("Fzf not installed, please install to navigate!")
         exit()
@@ -163,10 +170,10 @@ if __name__ == "__main__":
     
     bindings = [
             f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
-            f"ctrl-f:execute-silent({SCRIPT_PATH}/HandleFeh.py stop)+change-preview({SCRIPT_PATH}/preview-files.py {{2}})",
+            f"ctrl-f:change-preview({SCRIPT_PATH}/preview-files.py {{1..2}})",
             "ctrl-w:toggle-preview-wrap"]
     
-    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="" --bind="{",".join(bindings)}"'
+    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="{SCRIPT_PATH}/preview-img.py {{}}" --bind="{",".join(bindings)}"'
     fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
     
     with open(DB_PATH, 'r') as file:
@@ -183,4 +190,9 @@ if __name__ == "__main__":
         if '..' in tags: exit()
         tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
+    fifo = os.path.join(SCRIPT_PATH, '.img_list')
+    try:
+        os.remove(fifo)
+    finally:
+        os.mkfifo(fifo)
     main()
