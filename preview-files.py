@@ -6,14 +6,21 @@ import os
 import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
+FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 
 def main():
-    arg = sys.argv[1:]
-    choose = arg[0]
+    arg = sys.argv[1:][0].split('\t')
+    index = arg[0]
+    choose = arg[1]
+
+    img = os.path.join(SCRIPT_PATH, 'Imgs', f'{index}.jpg')
+    if os.path.exists(img):
+        with open(FEH_IMG_LIST, 'w') as fp:
+            fp.write(img)
 
     tree = choose.replace('\'', '\"')
     tree = json.loads(tree)
-    print('\n')
+    print('\n'*20)
 
     dirs = tree['Dirs']
     files = tree['Files']
