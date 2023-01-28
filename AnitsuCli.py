@@ -2,6 +2,7 @@
 
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
+from threading import Thread
 from shutil import which
 from time import sleep
 import subprocess as sp
@@ -32,7 +33,10 @@ def choose_anime():
 
     escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
 
-    if which('feh'):
+    if preview == "ueberzug":
+        with open(img_list, 'w') as fp:
+            fp.write('kill')
+    elif preview == "feh":
         HandleFeh.stop_feh()
 
     if escolha == '..\t..':
@@ -110,6 +114,12 @@ def watch(episodes, path):
 
 def main():
     while True:
+        if preview == "ueberzug":
+            t = Thread(target=preview_ueberzug.main)
+            t.start()
+        elif preview == "feh":
+            HandleFeh.start_feh()
+
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
         episodes, path = choose_eps(anime)
@@ -150,7 +160,7 @@ if __name__ == "__main__":
         asyncio.run(PostsAnitsu.main())
         asyncio.run(WebdavGetTree.main())
         exit()
-    
+   
     if not which('fzf'):
         print("Fzf not installed, please install to navigate!")
         exit()
@@ -161,12 +171,37 @@ if __name__ == "__main__":
         ARIA_TOKEN = os.getenv('ARIA_TOKEN')
         ARIA_DIR = os.getenv('ARIA_DIR')
     
-    bindings = [
-            f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
-            f"ctrl-f:execute-silent({SCRIPT_PATH}/HandleFeh.py stop)+change-preview({SCRIPT_PATH}/preview-files.py {{2}})",
-            "ctrl-w:toggle-preview-wrap"]
-    
-    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="" --bind="{",".join(bindings)}"'
+    preview = "feh" if which("feh") else ""
+    try:
+        import preview_ueberzug
+        preview = "ueberzug"
+    except:
+        pass
+
+    if os.getenv('DISPLAY') and os.name != "nt" and preview != "":
+
+        img_list = os.path.join(SCRIPT_PATH, '.img_list')
+        try:
+            os.remove(img_list)
+        finally:
+            if preview == "ueberzug":
+                os.mkfifo(img_list)
+            else:
+                open(img_list, 'w').close()
+
+        default_preview = f"{SCRIPT_PATH}/preview-img.py {{}} 'image'"
+        bindings = [
+                f"ctrl-p:change-preview({default_preview})",
+                f"ctrl-f:change-preview({SCRIPT_PATH}/preview-files.py {{1..2}} 'image')",
+                "ctrl-w:toggle-preview-wrap"]
+    else:
+        default_preview = ""
+        bindings = [
+                f"ctrl-p:change-preview({SCRIPT_PATH}/preview-img.py {{}})",
+                f"ctrl-f:change-preview({SCRIPT_PATH}/preview-files.py {{1..2}})",
+                "ctrl-w:toggle-preview-wrap"]
+
+    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="{default_preview}" --bind="{",".join(bindings)}"'
     fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
     
     with open(DB_PATH, 'r') as file:
