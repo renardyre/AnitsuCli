@@ -31,13 +31,12 @@ def choose_anime():
     
     clear_terminal()
 
-    escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
-
-    if preview == "ueberzug":
-        with open(img_list, 'w') as fp:
-            fp.write('kill')
-    elif preview == "feh":
-        HandleFeh.stop_feh()
+    try:
+        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
+    except:
+        stop_preview()
+        exit(0)
+    stop_preview()
 
     if escolha == '..\t..':
         exit(0)
@@ -58,6 +57,7 @@ def choose_eps(anime):
         files = [ file['Title'] for file in file_tree['Files'] ]
 
         choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
+        if len(choose) <= 0: exit()
 
         if choose[0] in dirs:
             dir = choose[0][2:]
@@ -136,6 +136,14 @@ def clear_terminal():
         os.system('cls')
     else:
         os.system('clear')
+
+def stop_preview():
+    if preview == "ueberzug":
+        with open(img_list, 'w') as fp:
+            fp.write('kill')
+    elif preview == "feh":
+        HandleFeh.stop_feh()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Lista e reproduz animes disponíveis na Anitsu", add_help=False)
@@ -218,4 +226,7 @@ if __name__ == "__main__":
         if '..' in tags: exit()
         tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit()
