@@ -31,13 +31,12 @@ def choose_anime():
     
     clear_terminal()
 
-    escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
-
-    if preview == "ueberzug":
-        with open(img_list, 'w') as fp:
-            fp.write('kill')
-    elif preview == "feh":
-        HandleFeh.stop_feh()
+    try:
+        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
+    except:
+        stop_preview()
+        exit(0)
+    stop_preview()
 
     if escolha == '..\t..':
         exit(0)
@@ -58,6 +57,7 @@ def choose_eps(anime):
         files = [ file['Title'] for file in file_tree['Files'] ]
 
         choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
+        if len(choose) <= 0: exit()
 
         if choose[0] in dirs:
             dir = choose[0][2:]
@@ -137,13 +137,21 @@ def clear_terminal():
     else:
         os.system('clear')
 
+def stop_preview():
+    if preview == "ueberzug":
+        with open(img_list, 'w') as fp:
+            fp.write('kill')
+    elif preview == "feh":
+        HandleFeh.stop_feh()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Lista e reproduz animes disponíveis na Anitsu", add_help=False)
     parser.add_argument('-p', '--player', default='mpv', type=str, choices=['mpv', 'syncplay'], help='Seleciona o player a ser utilizado. Padrão: mpv')
     parser.add_argument('-l', '--links', action='store_true', help='Em vez de reproduzir, retorna os links dos arquivos selecionados')
     parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
     parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
-    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.3)', help="Mostra a versão do programa")
+    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.4)', help="Mostra a versão do programa")
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Mostra esta mensagem de ajuda')
     
     SCRIPT_PATH = os.path.dirname(__file__)
@@ -183,6 +191,7 @@ if __name__ == "__main__":
         img_list = os.path.join(SCRIPT_PATH, '.img_list')
         try:
             os.remove(img_list)
+        except: pass
         finally:
             if preview == "ueberzug":
                 os.mkfifo(img_list)
@@ -218,4 +227,7 @@ if __name__ == "__main__":
         if '..' in tags: exit()
         tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit()

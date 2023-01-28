@@ -12,8 +12,12 @@ FEH_PID = os.path.join(SCRIPT_PATH, ".feh_pid")
 IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 
 def start_feh():
-    with open(FEH_PID, 'r') as fp:
-        pid = fp.read() 
+    try:
+        with open(FEH_PID, 'r') as fp:
+            pid = fp.read() 
+    except FileNotFoundError:
+        pid = "stopped"
+
     if pid != "stopped":
         return
 
