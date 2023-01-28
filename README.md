@@ -30,7 +30,7 @@ ANITSU_USERNAME=""  #Seu usuário na Anitsu
 ANITSU_PASSWD=""    #Sua Senha na Anitsu
 ARIA_URL=""         #Opcional (Download automático pelo aria2)
 ARIA_TOKEN=""       #Opcional (Download automático pelo aria2)
-ARIA_DIR=""			#Opcional (Pasta padrão de download, usa o caminho inteiro do arquivo)
+ARIA_DIR=""         #Opcional (Pasta padrão de download, usa o caminho inteiro do arquivo)
 ```
 
 #### Usuários de Windows
