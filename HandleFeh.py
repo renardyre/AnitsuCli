@@ -9,7 +9,7 @@ import subprocess as sp
 SCRIPT_PATH = os.path.dirname(__file__)
 FEH_IMG = os.path.join(SCRIPT_PATH, ".feh_img.jpg")
 FEH_PID = os.path.join(SCRIPT_PATH, ".feh_pid")
-FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
+IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 
 def start_feh():
     with open(FEH_PID, 'r') as fp:
@@ -18,10 +18,10 @@ def start_feh():
         return
 
     os.system(f'convert xc:black -size 1x1 {FEH_IMG}')
-    with open(FEH_IMG_LIST, 'w') as fp:
+    with open(IMG_LIST, 'w') as fp:
         fp.write(FEH_IMG)
 
-    command = ['feh', '-f', FEH_IMG_LIST, '--scale-down', '--reload', '0.1', '--auto-zoom', '-q', '-x', '--image-bg', 'black', '--class', 'FloatingFeh']
+    command = ['feh', '-f', IMG_LIST, '--scale-down', '--reload', '0.1', '--auto-zoom', '-q', '-x', '--image-bg', 'black', '--class', 'FloatingFeh']
     pid = sp.Popen(command, stdin=sp.PIPE, stdout=sp.PIPE,).pid
 
     with open(FEH_PID, 'w') as fp:

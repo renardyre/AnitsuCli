@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-from shutil import which, copy
 from time import sleep
 import sys
 import os
 import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
-FEH_IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
+IMG_LIST = os.path.join(SCRIPT_PATH, ".img_list")
 
 def main():
     arg = sys.argv[1:]
@@ -15,11 +14,14 @@ def main():
     index = choose[0]
     if index == "..": return
 
-    if which('feh'):
+    try: image = arg[1].strip()
+    except: image = ""
+
+    if image:
         print('\n'*18)
         img = os.path.join(SCRIPT_PATH, 'Imgs', f'{index}.jpg')
         if os.path.exists(img): 
-            with open(FEH_IMG_LIST, 'w') as fp:
+            with open(IMG_LIST, 'w') as fp:
                 fp.write(img)
 
     print('\n')

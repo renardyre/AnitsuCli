@@ -2,6 +2,7 @@
 
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
+from threading import Thread
 from shutil import which
 from time import sleep
 import subprocess as sp
@@ -32,7 +33,10 @@ def choose_anime():
 
     escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
 
-    if which('feh'):
+    if preview == "ueberzug":
+        with open(img_list, 'w') as fp:
+            fp.write('kill')
+    elif preview == "feh":
         HandleFeh.stop_feh()
 
     if escolha == '..\t..':
@@ -46,6 +50,7 @@ def choose_eps(anime):
     if "Tree" not in anime.keys(): return
     file_tree = anime["Tree"]
     previous = []
+    path = [anime["Title"]]
 
     while not choosed:
 
@@ -55,8 +60,10 @@ def choose_eps(anime):
         choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
 
         if choose[0] in dirs:
+            dir = choose[0][2:]
             previous.append(file_tree.copy())
-            file_tree = file_tree["Dirs"][choose[0][2:]]
+            path.append(dir)
+            file_tree = file_tree["Dirs"][dir]
     
         elif choose[0] in files:
             episodes = []
@@ -67,20 +74,24 @@ def choose_eps(anime):
     
         elif choose[0] == "..":
             if len(previous) == 0:
-                return
+                return ('','')
             file_tree = previous.pop()
+            path.pop()
 
-    return episodes
+    return episodes, "/".join(path)
 
 
-def watch(episodes):
+def watch(episodes, path):
     if returnLinks:
         links = "\n".join([ f"https://{i['Link']}" for i in episodes ])
         try: pyperclip.copy(links)
         except: pass
         try:
             for i in episodes:
-                payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]}
+                if ARIA_DIR:
+                    payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"], {'dir': f"{ARIA_DIR}/{path}"}]}
+                else:
+                    payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]}
                 r = requests.post(ARIA_URL, data=json.dumps(payload))
         except: pass
         print(links)
@@ -103,13 +114,19 @@ def watch(episodes):
 
 def main():
     while True:
+        if preview == "ueberzug":
+            t = Thread(target=preview_ueberzug.main)
+            t.start()
+        elif preview == "feh":
+            HandleFeh.start_feh()
+
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
-        episodes = choose_eps(anime)
+        episodes, path = choose_eps(anime)
         if episodes:
             if not returnLinks and which("dunstify"):
                 os.system(f"dunstify 'AnitsuCli: Started playing' '{title}' -I {SCRIPT_PATH}/Imgs/{image}.jpg")
-            watch(episodes)
+            watch(episodes, path)
 
 def clean_title(str: str):
     return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
@@ -126,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--links', action='store_true', help='Em vez de reproduzir, retorna os links dos arquivos selecionados')
     parser.add_argument('-t', '--tags', action='store_true', help='Seleciona tags')
     parser.add_argument('-u', '--update', action='store_true', help='Atualiza a base de dados')
-    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.2)', help="Mostra a versão do programa")
+    parser.add_argument('-v', '--version', action='version', version='AnitsuCli (v0.1.3)', help="Mostra a versão do programa")
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Mostra esta mensagem de ajuda')
     
     SCRIPT_PATH = os.path.dirname(__file__)
@@ -143,7 +160,7 @@ if __name__ == "__main__":
         asyncio.run(PostsAnitsu.main())
         asyncio.run(WebdavGetTree.main())
         exit()
-    
+   
     if not which('fzf'):
         print("Fzf not installed, please install to navigate!")
         exit()
@@ -152,13 +169,39 @@ if __name__ == "__main__":
         load_dotenv()
         ARIA_URL = os.getenv('ARIA_URL')
         ARIA_TOKEN = os.getenv('ARIA_TOKEN')
+        ARIA_DIR = os.getenv('ARIA_DIR')
     
-    bindings = [
-            f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
-            f"ctrl-f:execute-silent({SCRIPT_PATH}/HandleFeh.py stop)+change-preview({SCRIPT_PATH}/preview-files.py {{2}})",
-            "ctrl-w:toggle-preview-wrap"]
-    
-    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="" --bind="{",".join(bindings)}"'
+    preview = "feh" if which("feh") else ""
+    try:
+        import preview_ueberzug
+        preview = "ueberzug"
+    except:
+        pass
+
+    if os.getenv('DISPLAY') and os.name != "nt" and preview != "":
+
+        img_list = os.path.join(SCRIPT_PATH, '.img_list')
+        try:
+            os.remove(img_list)
+        finally:
+            if preview == "ueberzug":
+                os.mkfifo(img_list)
+            else:
+                open(img_list, 'w').close()
+
+        default_preview = f"{SCRIPT_PATH}/preview-img.py {{}} 'image'"
+        bindings = [
+                f"ctrl-p:change-preview({default_preview})",
+                f"ctrl-f:change-preview({SCRIPT_PATH}/preview-files.py {{1..2}} 'image')",
+                "ctrl-w:toggle-preview-wrap"]
+    else:
+        default_preview = ""
+        bindings = [
+                f"ctrl-p:change-preview({SCRIPT_PATH}/preview-img.py {{}})",
+                f"ctrl-f:change-preview({SCRIPT_PATH}/preview-files.py {{1..2}})",
+                "ctrl-w:toggle-preview-wrap"]
+
+    fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="{default_preview}" --bind="{",".join(bindings)}"'
     fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
     
     with open(DB_PATH, 'r') as file:
