@@ -1,9 +1,11 @@
 import ueberzug.lib.v0 as ueberzug
 import shutil
+import os
 
 def main():
     P = 0.42
-    UB_FIFO = "/home/renardyre/AnitsuCli/.img_list"
+    SCRIPT_PATH = os.path.dirname(__file__)
+    UB_FIFO = os.path.join(SCRIPT_PATH, '.img_list')
     COL = shutil.get_terminal_size().columns * P
     
     with ueberzug.Canvas() as canvas:
