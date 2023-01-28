@@ -18,7 +18,7 @@ Nota: Certifique-se de que você tem todas as dependências essênciais instalad
 - [fzf](https://github.com/junegunn/fzf) é necessário para a pesquisa e seleção de episódios.
 - [mpv](https://github.com/mpv-player/mpv) é necessário para reproduzir os episódios.
 #### Opcionais
-- [feh](https://github.com/derf/feh) é usado para exibir as capas dos animes.
+- [ueberzug](https://github.com/doytsujin/ueberzug) ou [feh](https://github.com/derf/feh) são usados para exibir as capas dos animes.
 - [rclone](https://rclone.org) é usado para suporte de armazenamento em nuvem do Google Drive.
 - [aria2](https://github.com/aria2/aria2) é usado para baixar os episódios.
 - [imagemagick](https://github.com/ImageMagick/ImageMagick) é usado para redimensionar as capas dos animes.
