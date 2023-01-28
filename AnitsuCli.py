@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-from threading import Thread
-import preview_ueberzug
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
+from threading import Thread
 from shutil import which
 from time import sleep
 import subprocess as sp
@@ -174,7 +173,7 @@ if __name__ == "__main__":
     
     preview = "feh" if which("feh") else ""
     try:
-        import ueberzug.lib.v0 as ueberzug
+        import preview_ueberzug
         preview = "ueberzug"
     except:
         pass
