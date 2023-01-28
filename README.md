@@ -24,12 +24,13 @@ Nota: Certifique-se de que você tem todas as dependências essênciais instalad
 - [imagemagick](https://github.com/ImageMagick/ImageMagick) é usado para redimensionar as capas dos animes.
 
 ## Setup
-No diretório raiz do projeto, crie um arquivo chamado .env`. Adicione as seguintes linhas e preencha com as suas credenciais:
+No diretório raiz do projeto, crie um arquivo chamado `.env`. Adicione as seguintes linhas e preencha com as suas credenciais:
 ```env
 ANITSU_USERNAME=""  #Seu usuário na Anitsu
 ANITSU_PASSWD=""    #Sua Senha na Anitsu
 ARIA_URL=""         #Opcional (Download automático pelo aria2)
 ARIA_TOKEN=""       #Opcional (Download automático pelo aria2)
+ARIA_DIR=""         #Opcional (Pasta padrão de download, usa o caminho inteiro do arquivo)
 ```
 
 #### Usuários de Windows

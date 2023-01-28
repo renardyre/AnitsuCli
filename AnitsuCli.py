@@ -46,6 +46,7 @@ def choose_eps(anime):
     if "Tree" not in anime.keys(): return
     file_tree = anime["Tree"]
     previous = []
+    path = [anime["Title"]]
 
     while not choosed:
 
@@ -55,8 +56,10 @@ def choose_eps(anime):
         choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
 
         if choose[0] in dirs:
+            dir = choose[0][2:]
             previous.append(file_tree.copy())
-            file_tree = file_tree["Dirs"][choose[0][2:]]
+            path.append(dir)
+            file_tree = file_tree["Dirs"][dir]
     
         elif choose[0] in files:
             episodes = []
@@ -67,20 +70,24 @@ def choose_eps(anime):
     
         elif choose[0] == "..":
             if len(previous) == 0:
-                return
+                return ('','')
             file_tree = previous.pop()
+            path.pop()
 
-    return episodes
+    return episodes, "/".join(path)
 
 
-def watch(episodes):
+def watch(episodes, path):
     if returnLinks:
         links = "\n".join([ f"https://{i['Link']}" for i in episodes ])
         try: pyperclip.copy(links)
         except: pass
         try:
             for i in episodes:
-                payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]}
+                if ARIA_DIR:
+                    payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"], {'dir': f"{ARIA_DIR}/{path}"}]}
+                else:
+                    payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]}
                 r = requests.post(ARIA_URL, data=json.dumps(payload))
         except: pass
         print(links)
@@ -105,11 +112,11 @@ def main():
     while True:
         anime, image = choose_anime()
         title = clean_title(anime["Title"])
-        episodes = choose_eps(anime)
+        episodes, path = choose_eps(anime)
         if episodes:
             if not returnLinks and which("dunstify"):
                 os.system(f"dunstify 'AnitsuCli: Started playing' '{title}' -I {SCRIPT_PATH}/Imgs/{image}.jpg")
-            watch(episodes)
+            watch(episodes, path)
 
 def clean_title(str: str):
     return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
@@ -152,6 +159,7 @@ if __name__ == "__main__":
         load_dotenv()
         ARIA_URL = os.getenv('ARIA_URL')
         ARIA_TOKEN = os.getenv('ARIA_TOKEN')
+        ARIA_DIR = os.getenv('ARIA_DIR')
     
     bindings = [
             f"ctrl-p:execute-silent({SCRIPT_PATH}/HandleFeh.py start)+change-preview({SCRIPT_PATH}/preview-img.py {{}})",
