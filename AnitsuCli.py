@@ -191,6 +191,7 @@ if __name__ == "__main__":
         img_list = os.path.join(SCRIPT_PATH, '.img_list')
         try:
             os.remove(img_list)
+        except: pass
         finally:
             if preview == "ueberzug":
                 os.mkfifo(img_list)
