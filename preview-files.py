@@ -36,7 +36,20 @@ def main():
         print("\033[96m{}\033[0m".format('\n'.join([f" {i}" for i in dirs])))
 
     if len(files) > 0:
-        print("{}".format('\n'.join([i['Title'] for i in files])))
+        for file in files:
+            print("{} \033[94m{}\033[0m".format(fsize(file['Size']), file['Title']))
+
+def fsize(size):
+    size = int(size)
+    units = ["KB", "MB", "GB", "TB", "PB"]
+    fsize = f"{size} B"
+    for i in units:
+        if size < 1000:
+            break
+        size /= 1000
+        fsize = f"{size:7.2f} {i}"
+    return fsize
+
 
 if __name__ == "__main__":
     main()
