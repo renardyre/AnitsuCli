@@ -97,6 +97,7 @@ async def gdrive(link:str, index:str):
         size = int(f["Size"])
         id = f["ID"]
         temp = db[index]['Tree']['Dirs']['Google Drive']
+        db[index]['Tree']['Size'] += size
         temp['Size'] += size
         for p in path[:-1]:
             temp = temp['Dirs'][p]
