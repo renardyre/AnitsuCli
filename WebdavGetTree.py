@@ -12,6 +12,7 @@ import os
 
 OCLOUD_URL = "https://www.odrive.com/rest/weblink/list_folder?weblinkUri=/{}"
 GDRIVE_URL = "drive.google.com/u/0/uc?id={}&export=download&confirm=t"
+FILES_NEXT = re.compile(r'<d:response><d:href>/nextcloud/public.php/webdav/([^<]+?[^/])</d:href>.*?<d:getcontentlength>(.*?)</d:getcontentlength>.*?</d:response>')
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
@@ -126,14 +127,15 @@ async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
             return
         text = await r.text()
 
-    files = [ unquote(i) for i in re.findall(r'public.php\/webdav/([^<]+?)</d', text)]
+    files = re.search(r'[^/]\<\/d\:href\>', text)
 
     if not files and 'contenttype>video/' in text:
         async with session.request(method='HEAD', url=url, auth=auth) as r:
             filename = unquote(re.search(r'filename=\"([^\"]*)', r.headers['content-disposition']).group(1))
             await get_files(filename, link, first, index)
     else:
-        paths = [ i.split('/') for i in files if i.split('/')[-1] != '']
+        data = re.findall(FILES_NEXT, text)
+        paths = [ (unquote(i).split('/'), j) for i, j in data ]
         await get_files(paths, link, first, index)
 
 async def get_files(paths: list, link: str, first: bool, index: str):
@@ -147,7 +149,7 @@ async def get_files(paths: list, link: str, first: bool, index: str):
     if not first:
         dir = await get_name(link)
 
-    for path in paths:
+    for path, size in paths:
         url = f"{link}/download?path=/"
         temp = db[index]['Tree']
         if not first:
@@ -156,7 +158,7 @@ async def get_files(paths: list, link: str, first: bool, index: str):
             url += quote(i) + "/"
             temp = temp['Dirs'][i]
 
-        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}"})
+        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}", "Size": size})
 
 async def get_name(link: str):
     async with session.get(f"https://{link}") as r:
