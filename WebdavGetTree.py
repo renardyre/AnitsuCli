@@ -94,12 +94,14 @@ async def gdrive(link:str, index:str):
     files = json.loads(stdout.decode())
     for f in files:
         path = f["Path"].split('/')
-        size = f["Size"]
+        size = int(f["Size"])
         id = f["ID"]
         temp = db[index]['Tree']['Dirs']['Google Drive']
+        temp['Size'] += size
         for p in path[:-1]:
             temp = temp['Dirs'][p]
-        temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
+            temp['Size'] += size
+        temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id), "Size": size})
 
 async def odrive(link:str, index:str):
     id = link.split('/')[-1]
@@ -132,7 +134,8 @@ async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
     if not files and 'contenttype>video/' in text:
         async with session.request(method='HEAD', url=url, auth=auth) as r:
             filename = unquote(re.search(r'filename=\"([^\"]*)', r.headers['content-disposition']).group(1))
-            await get_files(filename, link, first, index)
+            size = r.headers['content-length']
+            await get_files(f"{filename}\t{size}", link, first, index)
     else:
         data = re.findall(FILES_NEXT, text)
         paths = [ (unquote(i).split('/'), j) for i, j in data ]
@@ -140,10 +143,13 @@ async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
 
 async def get_files(paths: list, link: str, first: bool, index: str):
     if type(paths) == str:
+        name, size = paths.split('\t')
+        db[index]['Tree']['Size'] += int(size)
         if first:
-            db[index]['Tree']['Files'] = [{"Title": paths, "Link": f"{link}/download/{quote(paths)}"}]
+            db[index]['Tree']['Files'] = [{"Title": name, "Link": f"{link}/download/{quote(name)}", "Size": int(size)}]
         else:
-            db[index]['Tree']['Dirs'][paths] = {'Dirs': {}, 'Files': [{"Title": paths, "Link": f"{link}/download/{quote(paths)}"}]}
+            db[index]['Tree']['Dirs'][name]['Size'] += int(size)
+            db[index]['Tree']['Dirs'][name] = {'Dirs': {}, 'Files': [{"Title": name, "Link": f"{link}/download/{quote(name)}", "Size": int(size)}]}
         return
 
     if not first:
@@ -161,7 +167,7 @@ async def get_files(paths: list, link: str, first: bool, index: str):
             temp = temp['Dirs'][i]
             temp['Size'] += int(size)
 
-        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}", "Size": size})
+        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}", "Size": int(size)})
 
 async def get_name(link: str):
     async with session.get(f"https://{link}") as r:
