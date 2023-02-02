@@ -30,6 +30,7 @@ def choose_anime():
                         {'Title': dir,
                          'Size': database[str(key)]['Tree']['Dirs'][dir].get('Size')} for dir in database[str(key)]['Tree']['Dirs']],
                     'Files': database[str(key)]['Tree']['Files']}
+                files = json.dumps(files, ensure_ascii=False)
                 titulosAnimes.append(f"{str(key)}\t{files}\t{database[str(key)]['Description']}\t{clean_title(database[str(key)]['Title'])}")
     else:
         for key in keys:
@@ -39,6 +40,7 @@ def choose_anime():
                     {'Title': dir,
                      'Size': database[str(key)]['Tree']['Dirs'][dir].get('Size')} for dir in database[str(key)]['Tree']['Dirs']],
                 'Files': database[str(key)]['Tree']['Files']}
+            files = json.dumps(files, ensure_ascii=False)
             titulosAnimes.append(f"{str(key)}\t{files}\t{database[str(key)]['Description']}\t{clean_title(database[str(key)]['Title'])}")
 
     clear_terminal()

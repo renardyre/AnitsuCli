@@ -26,7 +26,6 @@ def main():
                 fp.write(img)
 
     print('\n')
-    tree = tree.replace('\'', '\"')
     tree = json.loads(tree)
 
     dirs = tree['Dirs']
