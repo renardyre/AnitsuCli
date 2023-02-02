@@ -152,11 +152,14 @@ async def get_files(paths: list, link: str, first: bool, index: str):
     for path, size in paths:
         url = f"{link}/download?path=/"
         temp = db[index]['Tree']
+        temp['Size'] += int(size)
         if not first:
             temp = temp['Dirs'][dir]
+            temp['Size'] += int(size)
         for i in path[:-1]:
             url += quote(i) + "/"
             temp = temp['Dirs'][i]
+            temp['Size'] += int(size)
 
         temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}", "Size": size})
 
@@ -177,7 +180,7 @@ def pbar(curr: int, total: int, title: str):
     print(f"{text}{blank} {monotonic() - START:5.2f}s", end="\r")
 
 def molde():
-    return {"Dirs": defaultdict(molde), "Files": []}
+    return {"Dirs": defaultdict(molde), "Files": [], "Size": 0}
 
 if __name__ == "__main__":
     asyncio.run(main())
