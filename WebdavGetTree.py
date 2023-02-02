@@ -59,7 +59,7 @@ async def main():
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-        with open(DB_PATH, 'w') as file:
+        with open(DB_PATH, 'w', encoding='utf-8') as file:
             json.dump(db, file)
 
 async def run(queue: asyncio.Queue):
@@ -89,8 +89,8 @@ async def gdrive(link:str, index:str):
             'rclone', 'lsjson', '-R', '--files-only',
             '--no-modtime', '--no-mimetype',
             '--drive-root-folder-id', id, 'Anitsu:'
-        ]), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
+        ]), stdout=asyncio.subprocess.PIPE)
+    stdout, _ = await proc.communicate()
     files = json.loads(stdout.decode())
     for f in files:
         path = f["Path"].split('/')
