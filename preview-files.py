@@ -33,16 +33,21 @@ def main():
     files = tree['Files']
 
     if len(dirs) > 0:
-        print("\033[96m{}\033[0m".format('\n'.join([f" {i}" for i in dirs])))
+        for dir in dirs:
+            size = fsize(dir['Size'])
+            title = f" {dir['Title']}"
+            print("{} \033[96m{}\033[0m".format(size, title))
 
     if len(files) > 0:
         for file in files:
-            print("{} \033[94m{}\033[0m".format(fsize(file['Size']), file['Title']))
+            size = fsize(file['Size'])
+            title = file['Title']
+            print("{} \033[94m{}\033[0m".format(size, title))
 
 def fsize(size):
     size = int(size)
     units = ["KB", "MB", "GB", "TB", "PB"]
-    fsize = f"{size} B"
+    fsize = f"{size:7.2f} B "
     for i in units:
         if size < 1000:
             break
