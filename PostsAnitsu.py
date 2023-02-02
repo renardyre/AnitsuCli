@@ -85,7 +85,7 @@ async def main():
         await asyncio.gather(*tasks, return_exceptions=True)
 
     with open(DB_PATH, 'w', encoding='utf-8') as fp:
-        json.dump(db, fp)
+        json.dump(db, fp, ensure_ascii=False)
 
     downloadImages.main()
     print()

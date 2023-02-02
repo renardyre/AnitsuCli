@@ -60,7 +60,7 @@ async def main():
         await asyncio.gather(*tasks, return_exceptions=True)
 
         with open(DB_PATH, 'w', encoding='utf-8') as file:
-            json.dump(db, file)
+            json.dump(db, file, ensure_ascii=False)
 
 async def run(queue: asyncio.Queue):
     while True:
