@@ -25,6 +25,7 @@ def choose_anime():
         for key in keys:
             if "Tags" in database[str(key)] and set(tags) & set(database[str(key)]['Tags']):
                 files = {
+                    'Size': database[str(key)]['Tree']['Size'],
                     'Dirs': [
                         {'Title': dir,
                          'Size': database[str(key)]['Tree']['Dirs'][dir].get('Size')} for dir in database[str(key)]['Tree']['Dirs']],
@@ -33,6 +34,7 @@ def choose_anime():
     else:
         for key in keys:
             files = {
+                'Size': database[str(key)]['Tree']['Size'],
                 'Dirs': [
                     {'Title': dir,
                      'Size': database[str(key)]['Tree']['Dirs'][dir].get('Size')} for dir in database[str(key)]['Tree']['Dirs']],

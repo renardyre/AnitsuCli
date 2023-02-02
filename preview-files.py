@@ -31,6 +31,8 @@ def main():
 
     dirs = tree['Dirs']
     files = tree['Files']
+    size = tree['Size']
+    print(f"\033[4m\033[1;92mTamanho Total:\033[0m {fsize(size)}")
 
     if len(dirs) > 0:
         for dir in dirs:
