@@ -12,6 +12,7 @@ import os
 
 OCLOUD_URL = "https://www.odrive.com/rest/weblink/list_folder?weblinkUri=/{}"
 GDRIVE_URL = "drive.google.com/u/0/uc?id={}&export=download&confirm=t"
+FILES_NEXT = re.compile(r'<d:response><d:href>/nextcloud/public.php/webdav/([^<]+?[^/])</d:href>.*?<d:getcontentlength>(.*?)</d:getcontentlength>.*?</d:response>')
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
 TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
@@ -58,8 +59,8 @@ async def main():
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-        with open(DB_PATH, 'w') as file:
-            json.dump(db, file)
+        with open(DB_PATH, 'w', encoding='utf-8') as file:
+            json.dump(db, file, ensure_ascii=False)
 
 async def run(queue: asyncio.Queue):
     while True:
@@ -88,17 +89,20 @@ async def gdrive(link:str, index:str):
             'rclone', 'lsjson', '-R', '--files-only',
             '--no-modtime', '--no-mimetype',
             '--drive-root-folder-id', id, 'Anitsu:'
-        ]), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
+        ]), stdout=asyncio.subprocess.PIPE)
+    stdout, _ = await proc.communicate()
     files = json.loads(stdout.decode())
     for f in files:
         path = f["Path"].split('/')
-        size = f["Size"]
+        size = int(f["Size"])
         id = f["ID"]
         temp = db[index]['Tree']['Dirs']['Google Drive']
+        db[index]['Tree']['Size'] += size
+        temp['Size'] += size
         for p in path[:-1]:
             temp = temp['Dirs'][p]
-        temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id)})
+            temp['Size'] += size
+        temp['Files'].append({"Title": path[-1], "Link": GDRIVE_URL.format(id), "Size": size})
 
 async def odrive(link:str, index:str):
     id = link.split('/')[-1]
@@ -126,37 +130,45 @@ async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
             return
         text = await r.text()
 
-    files = [ unquote(i) for i in re.findall(r'public.php\/webdav/([^<]+?)</d', text)]
+    files = re.search(r'[^/]\<\/d\:href\>', text)
 
     if not files and 'contenttype>video/' in text:
         async with session.request(method='HEAD', url=url, auth=auth) as r:
             filename = unquote(re.search(r'filename=\"([^\"]*)', r.headers['content-disposition']).group(1))
-            await get_files(filename, link, first, index)
+            size = r.headers['content-length']
+            await get_files(f"{filename}\t{size}", link, first, index)
     else:
-        paths = [ i.split('/') for i in files if i.split('/')[-1] != '']
+        data = re.findall(FILES_NEXT, text)
+        paths = [ (unquote(i).split('/'), j) for i, j in data ]
         await get_files(paths, link, first, index)
 
 async def get_files(paths: list, link: str, first: bool, index: str):
     if type(paths) == str:
+        name, size = paths.split('\t')
+        db[index]['Tree']['Size'] += int(size)
         if first:
-            db[index]['Tree']['Files'] = [{"Title": paths, "Link": f"{link}/download/{quote(paths)}"}]
+            db[index]['Tree']['Files'] = [{"Title": name, "Link": f"{link}/download/{quote(name)}", "Size": int(size)}]
         else:
-            db[index]['Tree']['Dirs'][paths] = {'Dirs': {}, 'Files': [{"Title": paths, "Link": f"{link}/download/{quote(paths)}"}]}
+            db[index]['Tree']['Dirs'][name]['Size'] += int(size)
+            db[index]['Tree']['Dirs'][name] = {'Dirs': {}, 'Files': [{"Title": name, "Link": f"{link}/download/{quote(name)}", "Size": int(size)}]}
         return
 
     if not first:
         dir = await get_name(link)
 
-    for path in paths:
+    for path, size in paths:
         url = f"{link}/download?path=/"
         temp = db[index]['Tree']
+        temp['Size'] += int(size)
         if not first:
             temp = temp['Dirs'][dir]
+            temp['Size'] += int(size)
         for i in path[:-1]:
             url += quote(i) + "/"
             temp = temp['Dirs'][i]
+            temp['Size'] += int(size)
 
-        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}"})
+        temp['Files'].append({"Title": path[-1], "Link": f"{url}{quote(path[-1])}", "Size": int(size)})
 
 async def get_name(link: str):
     async with session.get(f"https://{link}") as r:
@@ -175,7 +187,7 @@ def pbar(curr: int, total: int, title: str):
     print(f"{text}{blank} {monotonic() - START:5.2f}s", end="\r")
 
 def molde():
-    return {"Dirs": defaultdict(molde), "Files": []}
+    return {"Dirs": defaultdict(molde), "Files": [], "Size": 0}
 
 if __name__ == "__main__":
     asyncio.run(main())

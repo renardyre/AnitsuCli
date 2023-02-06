@@ -20,15 +20,29 @@ import re
 
 def choose_anime():
     keys = sorted([ int(i) for i in database.keys()], reverse=True)
+    titulosAnimes = []
     if selectTags: 
-        titulosAnimes = [
-                f"{str(i)}\t{{'Dirs': {list(database[str(i)]['Tree']['Dirs'].keys())}, 'Files': {list(database[str(i)]['Tree']['Files'])}}}\t{database[str(i)]['Description']}\t{clean_title(database[str(i)]['Title'])}" for i in keys if "Tags" in database[str(i)] and set(tags) & set(database[str(i)]["Tags"])
-        ]
+        for key in keys:
+            if "Tags" in database[str(key)] and set(tags) & set(database[str(key)]['Tags']):
+                files = {
+                    'Size': database[str(key)]['Tree']['Size'],
+                    'Dirs': [
+                        {'Title': dir,
+                         'Size': database[str(key)]['Tree']['Dirs'][dir].get('Size')} for dir in database[str(key)]['Tree']['Dirs']],
+                    'Files': database[str(key)]['Tree']['Files']}
+                files = json.dumps(files, ensure_ascii=False)
+                titulosAnimes.append(f"{str(key)}\t{files}\t{database[str(key)]['Description']}\t{clean_title(database[str(key)]['Title'])}")
     else:
-        titulosAnimes = [
-                f"{str(i)}\t{{'Dirs': {list(database[str(i)]['Tree']['Dirs'].keys())}, 'Files': {list(database[str(i)]['Tree']['Files'])}}}\t{database[str(i)]['Description']}\t{clean_title(database[str(i)]['Title'])}" for i in keys
-        ]
-    
+        for key in keys:
+            files = {
+                'Size': database[str(key)]['Tree']['Size'],
+                'Dirs': [
+                    {'Title': dir,
+                     'Size': database[str(key)]['Tree']['Dirs'][dir].get('Size')} for dir in database[str(key)]['Tree']['Dirs']],
+                'Files': database[str(key)]['Tree']['Files']}
+            files = json.dumps(files, ensure_ascii=False)
+            titulosAnimes.append(f"{str(key)}\t{files}\t{database[str(key)]['Description']}\t{clean_title(database[str(key)]['Title'])}")
+
     clear_terminal()
 
     try:

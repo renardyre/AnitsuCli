@@ -84,8 +84,8 @@ async def main():
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    with open(DB_PATH, 'w') as fp:
-        json.dump(db, fp)
+    with open(DB_PATH, 'w', encoding='utf-8') as fp:
+        json.dump(db, fp, ensure_ascii=False)
 
     downloadImages.main()
     print()
@@ -118,9 +118,9 @@ async def get_data(queue: asyncio.Queue):
 async def update_db(posts: dict):
     for post in posts:
         content = post['content']['rendered']
-        links = re.findall(R_NEXTCLOUD, content)
+        links = list(set(re.findall(R_NEXTCLOUD, content)))
         odrive_links = re.findall(R_OCLOUD, content)
-        gd_links = re.findall(R_GDR, content)
+        gd_links = list(set(re.findall(R_GDR, content)))
         if not links and not odrive_links and not gd_links: continue
         notifications.append(post['id'])
         db[post['id']] = {

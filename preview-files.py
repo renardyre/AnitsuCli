@@ -26,17 +26,36 @@ def main():
                 fp.write(img)
 
     print('\n')
-    tree = tree.replace('\'', '\"')
     tree = json.loads(tree)
 
     dirs = tree['Dirs']
     files = tree['Files']
+    size = tree['Size']
+    print(f"\033[4m\033[1;92mTamanho Total:\033[0m {fsize(size)}")
 
     if len(dirs) > 0:
-        print("\033[96m{}\033[0m".format('\n'.join([f" {i}" for i in dirs])))
+        for dir in dirs:
+            size = fsize(dir['Size'])
+            title = f" {dir['Title']}"
+            print("{} \033[96m{}\033[0m".format(size, title))
 
     if len(files) > 0:
-        print("{}".format('\n'.join([i['Title'] for i in files])))
+        for file in files:
+            size = fsize(file['Size'])
+            title = file['Title']
+            print("{} \033[94m{}\033[0m".format(size, title))
+
+def fsize(size):
+    size = int(size)
+    units = ["KB", "MB", "GB", "TB", "PB"]
+    fsize = f"{size:7.2f} B "
+    for i in units:
+        if size < 1000:
+            break
+        size /= 1000
+        fsize = f"{size:7.2f} {i}"
+    return fsize
+
 
 if __name__ == "__main__":
     main()
