@@ -101,12 +101,13 @@ def watch(episodes, path):
         try: pyperclip.copy(links)
         except: pass
         try:
+            payload = {'jsonrpc':'2.0', 'id':'0', 'method':'system.multicall', 'params':[[]]}
             for i in episodes:
                 if ARIA_DIR:
-                    payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"], {'dir': f"{ARIA_DIR}/{path}"}]}
+                    payload['params'][0].append({'methodName':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"], {'dir': f"{ARIA_DIR}/{path}"}]})
                 else:
-                    payload = {'jsonrpc':'2.0', 'id':'0', 'method':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]}
-                r = requests.post(ARIA_URL, data=json.dumps(payload))
+                    payload['params'][0].append({'methodName':'aria2.addUri', 'params':[f'token:{ARIA_TOKEN}', [f"https://{i['Link']}"]]})
+            r = requests.post(ARIA_URL, data=json.dumps(payload))
         except: pass
         print(links)
         exit()
