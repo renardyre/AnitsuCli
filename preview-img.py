@@ -26,7 +26,7 @@ def main():
 
     print('\n')
     text = choose[2].replace('NeLi', '\n')
-    print(re.sub(r'(.*)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text))
+    print(re.sub(r'^(.*?)(?:\:)' , r'\033[4m\033[1m\1:\033[0m', text, flags=re.MULTILINE))
 
 if __name__ == "__main__":
     main()
