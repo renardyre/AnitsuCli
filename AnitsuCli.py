@@ -67,14 +67,15 @@ def choose_eps(anime):
 
     while not choosed:
 
-        dirs = [ f" {dir}" for dir in file_tree['Dirs'].keys() ]
-        files = [ file['Title'] for file in file_tree['Files'] ]
+        dirs = [ f"{fsize(v['Size'])}  {dir}" for dir, v in file_tree['Dirs'].items() ]
+        i_dirs = [i for i in file_tree['Dirs'].keys() ]
+        files = [ f"{fsize(file['Size'])} {file['Title']}" for file in file_tree['Files'] ]
 
         choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
         if len(choose) <= 0: exit()
 
         if choose[0] in dirs:
-            dir = choose[0][2:]
+            dir = i_dirs[dirs.index(choose[0])]
             previous.append(file_tree.copy())
             path.append(dir)
             file_tree = file_tree["Dirs"][dir]
@@ -158,6 +159,17 @@ def stop_preview():
             fp.write('kill')
     elif preview == "feh":
         HandleFeh.stop_feh()
+
+def fsize(size):
+    size = int(size)
+    units = ["KB", "MB", "GB", "TB", "PB"]
+    fsize = f"{size:6.2f} B "
+    for i in units:
+        if size < 1000:
+            break
+        size /= 1000
+        fsize = f"{size:6.2f} {i}"
+    return fsize
 
 
 if __name__ == "__main__":
