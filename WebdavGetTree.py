@@ -73,7 +73,7 @@ async def run(queue: asyncio.Queue):
                 await gdrive(link, index)
             elif 'drive.google.com/file' in link:
                 pass
-            elif 'cloud.anitsu' in link:
+            elif 'nextcloud' in link:
                 await nextcloud(first, link, index, title, passwd)
         except Exception as e:
             print(f"{link} - {e}")
