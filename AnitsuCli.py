@@ -46,7 +46,7 @@ def choose_anime():
     clear_terminal()
 
     try:
-        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview)[0]
+        escolha = fzf.prompt(titulosAnimes+['..\t..'], fzf_args + fzf_args_preview + " --prompt='Anime: ' --header='ctrl+f | ctrl+p | ctrl+w'")[0]
     except:
         stop_preview()
         exit(0)
@@ -71,7 +71,7 @@ def choose_eps(anime):
         i_dirs = [i for i in file_tree['Dirs'].keys() ]
         files = [ f"{fsize(file['Size'])} {file['Title']}" for file in file_tree['Files'] ]
 
-        choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
+        choose = fzf.prompt(dirs+files+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first' --prompt='Episódio(s): ' --header='ctrl-a | tab' --bind=left:clear-query+last+accept")
         if len(choose) <= 0: exit()
 
         if choose[0] in dirs:
@@ -238,7 +238,7 @@ if __name__ == "__main__":
                 "ctrl-w:toggle-preview-wrap"]
 
     fzf_args_preview = f' --preview-window="right,60%,border-left,wrap" --preview="{default_preview}" --bind="{",".join(bindings)}"'
-    fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100%'
+    fzf_args = '-i -e --delimiter="\t" --with-nth=-1 --reverse --cycle --height 100% --bind="right:accept,left:abort"'
     
     with open(DB_PATH, 'r') as file:
         database = json.load(file)
@@ -250,8 +250,8 @@ if __name__ == "__main__":
         uniqueTags = list(set(sorted(allTags)))
         uniqueTags.sort()
         uniqueTags = [f"{i} ({allTags.count(i)})" for i in uniqueTags]
-        tags = fzf.prompt(uniqueTags+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first'")
-        if '..' in tags: exit()
+        tags = fzf.prompt(uniqueTags+['..'], fzf_args + " -m --bind='ctrl-a:toggle-all+last+toggle+first' --prompt='Tag(s): ' --header='ctrl-a | tab'")
+        if '..' in tags or len(tags) == 0: exit()
         tags = [ ' '.join(i.split(' ')[:-1]) for i in tags ]
 
     try:
