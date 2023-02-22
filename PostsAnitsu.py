@@ -16,10 +16,10 @@ import re
 
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
-TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
 LAST_RUN =  os.path.join(SCRIPT_PATH, ".last_run")
 NOW = datetime.isoformat(datetime.now())
 START = monotonic()
+TAGS_URL = "https://anitsu.moe/wp-json/wp/v2/categories?per_page=100&_fields=id,name"
 WP_URL = "https://anitsu.moe/wp-json/wp/v2/posts?per_page=100&page={}&modified_after={}&_fields=id,date,modified,link,title,content,categories"
 CC_TASKS = 10
 T_COLUMNS = os.get_terminal_size().columns - 10
@@ -54,11 +54,11 @@ async def main():
             last_run = "2000-01-01T00:00:00"
             fp.write(NOW)
 
-    with open(TAGS_PATH, 'r') as fp:
-        tags = json.load(fp)
-
     counter = 0
     async with aiohttp.ClientSession() as session:
+        async with session.get(TAGS_URL, auth=auth) as t:
+            tags = await t.json()
+            tags = {i['id']: i['name'] for i in tags}
         async with session.get(WP_URL.format(1, last_run), auth=auth) as r:
             t_pages = int(r.headers['X-WP-TotalPages'])
             t_posts = int(r.headers['X-WP-Total'])
@@ -136,7 +136,7 @@ async def update_db(posts: dict):
             'Download': links,
             'ODrive': odrive_links,
             'GDrive': gd_links,
-            'Tags': [ tags[str(i)] for i in post['categories']]
+            'Tags': [ tags[i] for i in post['categories']]
         }
 
 def regex(pattern: re.Pattern, string: str):
@@ -156,14 +156,16 @@ def pbar(curr: int):
 
 def description(text: str):
     desc = html.unescape(text)
-    items = desc.split('<hr />')
-    if len(items) < 2: return ''
-    info = re.sub(r'\<.*?\>', '', items[0]).strip().replace('\n', 'NeLi')
-    sinopse = re.sub(r'\<.*?\>', '', items[1]).strip().replace('\n', 'NeLi')
-    return f"{info}NeLiNeLi{sinopse}"
+    desc = desc.replace('<hr />', '\n')
+    desc = re.sub(r'\<br.*?\>', '\n', desc)
+    desc = re.sub(r'\<.*?\>', '', desc)
+    info = re.sub(r'\n[\n|\s]*', '\n', desc)
+    info = info.replace('Sinopse', '\nSinopse').strip().replace('\n', 'NeLi')
+    info = re.sub(r'(Sinopse:.*?NeLi).*', r'\1', info)
+    return info
 
 def clean_title(str: str):
-  return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
+  return re.search(r'^.*?(?=(?: Multi| Trial| DUAL| Blu\-[Rr]ay| \[|$))', str).group()
 
 def clear_terminal():
     if os.name == "nt":

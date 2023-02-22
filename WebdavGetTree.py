@@ -15,7 +15,6 @@ GDRIVE_URL = "drive.google.com/u/0/uc?id={}&export=download&confirm=t"
 FILES_NEXT = re.compile(r'<d:response><d:href>/nextcloud/public.php/webdav/([^<]+?[^/])</d:href>.*?<d:getcontentlength>(.*?)</d:getcontentlength>.*?</d:response>')
 SCRIPT_PATH = os.path.dirname(__file__)
 DB_PATH = os.path.join(SCRIPT_PATH, "Anitsu.json")
-TAGS_PATH = os.path.join(SCRIPT_PATH, "Tags.json")
 CC_TASKS = 100
 T_COLUMNS = os.get_terminal_size().columns - 10
 START = monotonic()
