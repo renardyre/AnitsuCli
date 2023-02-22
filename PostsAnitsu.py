@@ -156,11 +156,13 @@ def pbar(curr: int):
 
 def description(text: str):
     desc = html.unescape(text)
-    items = desc.split('<hr />')
-    if len(items) < 2: return ''
-    info = re.sub(r'\<.*?\>', '', items[0]).strip().replace('\n', 'NeLi')
-    sinopse = re.sub(r'\<.*?\>', '', items[1]).strip().replace('\n', 'NeLi')
-    return f"{info}NeLiNeLi{sinopse}"
+    desc = desc.replace('<hr />', '\n')
+    desc = re.sub(r'\<br.*?\>', '\n', desc)
+    desc = re.sub(r'\<.*?\>', '', desc)
+    info = re.sub(r'\n[\n|\s]*', '\n', desc)
+    info = info.replace('Sinopse', '\nSinopse').strip().replace('\n', 'NeLi')
+    info = re.sub(r'(Sinopse:.*?NeLi).*', r'\1', info)
+    return info
 
 def clean_title(str: str):
   return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
