@@ -145,7 +145,7 @@ def main():
             watch(episodes, path)
 
 def clean_title(str: str):
-    return re.search(r'^.*?(?=(?: DUAL| Blu\-[Rr]ay| \[|$))', str).group()
+    return re.search(r'^.*?(?=(?: Multi| Trial| DUAL| Blu\-[Rr]ay| \[|$))', str).group()
 
 def clear_terminal():
     if os.name == "nt":
