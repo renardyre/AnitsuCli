@@ -7,7 +7,7 @@ Nota: Certifique-se de que você tem todas as dependências essênciais instalad
 
 ## Funcionalidades
 - Pesquisa e reprodução de animes.
-- Copia links de download para baixar os episódios (Se configurado, inicia o download no aria2).
+- Cópia de links de download para baixar os episódios (Se configurado, inicia o download no aria2).
 - Filtragem de animes a partir de tags. (Ex: Slice of Life, Isekai...)
 - Exibição de informações e imagens do anime.
 - Suporte a armazenamento em nuvem do Google Drive.
@@ -29,7 +29,7 @@ No diretório raiz do projeto, crie um arquivo chamado `.env`. Adicione as segui
 ```env
 ARIA_URL=""
 ARIA_TOKEN=""
-ARIA_DIR=""         #Opcional (Pasta padrão de download, usa o caminho inteiro do arquivo)
+ARIA_DIR="" #Opcional (Pasta padrão de download, usa o caminho inteiro do arquivo)
 ```
 
 #### Usuários de Windows
@@ -61,4 +61,4 @@ ctrl-w         Ativa ou desativa a quebra de linha automática do preview.
 ctrl-a         Seleciona todos os arquivos mostrados.
 ```
 
-![preview](preview.gif)
+![preview](https://i.imgur.com/KgPOE4d.png)
