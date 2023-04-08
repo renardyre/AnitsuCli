@@ -123,11 +123,14 @@ async def nextcloud(first:bool, link:str, index:str, title:str, passwd:str):
     headers = {'Depth': 'infinity'}
     auth = aiohttp.BasicAuth(id, passwd)
 
-    async with session.request(method="PROPFIND", url=url, headers=headers, auth=auth) as r:
-        if r.status != 207:
-            print('\n' + title + '\n')
-            return
-        text = await r.text()
+    while True:
+        async with session.request(method="PROPFIND", url=url, headers=headers, auth=auth) as r:
+            text = await r.text()
+            if r.status != 207:
+                print(" " * (T_COLUMNS + 10), end='\r')
+                print("\033[91mErro: \033[0m" + title)
+                await asyncio.sleep(3)
+            break
 
     files = re.search(r'[^/]\<\/d\:href\>', text)
 

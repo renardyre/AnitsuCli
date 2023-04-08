@@ -45,14 +45,17 @@ async def main():
             db = json.load(fp)
 
         with open(LAST_RUN, 'r+') as fp:
-            last_run = fp.read()
+            last_run = fp.read().strip()
             fp.seek(0)
             fp.write(NOW)
             fp.truncate()
+        update_diff = f"Last Update: \033[96m{datetime.fromisoformat(NOW)-datetime.fromisoformat(last_run)}\033[0m ago"
     else:
+        update_diff = "Updating all Database..."
         with open(LAST_RUN, 'w') as fp:
             last_run = "2000-01-01T00:00:00"
             fp.write(NOW)
+    print(update_diff)
 
     counter = 0
     async with aiohttp.ClientSession() as session:
